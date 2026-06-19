@@ -6,7 +6,6 @@
   <title>تطبيق المسح العقاري والمساحة - قوقل إيرث</title>                               
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>                                                                                   
@@ -79,10 +78,9 @@
     }
     .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-    /* التوافق التام مع شاشات الهواتف الذكية (Android App View) */
     @media (max-width: 768px) {
       .main-container { flex-direction: column; overflow-y: auto; }
-      #map { height: 45vh; width: 100%; flex: none; }
+      #map { height: 42vh; width: 100%; flex: none; }
       .sidebar { width: 100%; border-left: none; overflow-y: visible; padding: 12px; }
     }
   </style>
@@ -111,7 +109,7 @@
     </div>
                                                                                             
     <div class="card">
-      <h3>إضافة نقطة يدوياً</h3>                                                               
+      <h3>إضافة نقطة يدوياً / النقطة المحددة</h3>                                                               
       <div class="input-group">                                                                 
         <input type="number" id="manLat" placeholder="خط العرض" step="any">                     
         <input type="number" id="manLng" placeholder="خط الطول" step="any">
@@ -119,7 +117,7 @@
       <div class="input-group">
         <input type="number" id="manElev" placeholder="الارتفاع Z (اختياري)" step="any">                
       </div>
-      <button id="manAddBtn" style="width:100%;">إضافة النقطة</button>                      
+      <button id="manAddBtn" style="width:100%;">إضافة هذه النقطة للحساب</button>                      
     </div>
                                                                                             
     <div class="card">
@@ -170,17 +168,14 @@
 
 <script>
 (function(){                                                                              
-  // طبقة خريطة الشوارع الافتراضية
   var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
                                                                                           
-  // طبقة خرائط قوقل إيرث الهجينة (أقمار صناعية فائقة الدقة مع أسماء المعالم)
   var googleEarth = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {     
     maxZoom: 22,                                                                            
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: 'Map data ©Google Earth'                                                 
   });                                                                                   
   
-  // تهيئة الخريطة وجعل قوقل إيرث الطبقة الافتراضية للرفع المساحي
   var map = L.map('map', {
     center: [24.7136, 46.6753],                                                             
     zoom: 6,
@@ -198,24 +193,56 @@
   var utmZone = null;
   var polyShape = null;                                                                                                                                                           
   
-  function pickUtmZone(lat, lng) {
-    var zone = Math.floor((lng + 180) / 6) + 1;                                             
-    var isSouth = lat < 0;
-    var def = '+proj=utm +zone=' + zone + (isSouth ? ' +south' : '') + ' +datum=WGS84 +units=m +no_defs';                                                                           
-    return { zone: zone, isSouth: isSouth, def: def };                                    
-  }                                                                                                                                                                               
-  
-  // التفاعل مع النقرات لإسقاط الدبابيس وحساب المساحات مباشرة
+  // دالة الحساب المساحي المباشر لإسقاط UTM WGS84 بدون مكاتب خارجية لضمان عدم توقف التطبيق
+  function toUTM(lat, lng) {
+    var zone = Math.floor((lng + 180) / 6) + 1;
+    var lon0 = (zone * 6) - 183;
+    var latRad = lat * Math.PI / 180;
+    var lonRad = (lng - lon0) * Math.PI / 180;
+    
+    var a = 6378137.0; 
+    var f = 1.0 / 298.257223563; 
+    var b = a * (1.0 - f);
+    var e2 = (a*a - b*b) / (a*a);
+    var ePrime2 = (a*a - b*b) / (b*b);
+    var k0 = 0.9996;
+    
+    var N = a / Math.sqrt(1.0 - e2 * Math.sin(latRad) * Math.sin(latRad));
+    var T = Math.tan(latRad) * Math.tan(latRad);
+    var C = ePrime2 * Math.cos(latRad) * Math.cos(latRad);
+    var A = Math.cos(latRad) * lonRad;
+    
+    var M = a * ((1.0 - e2 / 4.0 - 3.0 * e2 * e2 / 64.0 - 5.0 * e2 * e2 / 256.0) * latRad
+              - (3.0 * e2 / 8.0 + 3.0 * e2 * e2 / 32.0 + 45.0 * e2 * e2 * e2 / 1024.0) * Math.sin(2.0 * latRad)
+              + (15.0 * e2 * e2 / 256.0 + 45.0 * e2 * e2 * e2 / 1024.0) * Math.sin(4.0 * latRad)
+              - (35.0 * e2 * e2 * e2 / 3072.0) * Math.sin(6.0 * latRad));
+              
+    var x = k0 * N * (A + (1.0 - T + C) * A * A * A / 6.0
+            + (5.0 - 18.0 * T + T * T + 72.0 * C - 58.0 * ePrime2) * A * A * A * A * A / 120.0) + 500000.0;
+            
+    var y = k0 * (M + N * Math.tan(latRad) * (A * A / 2.0 + (5.0 - T + 9.0 * C + 4.0 * C * C) * A * A * A * A / 24.0
+            + (61.0 - 58.0 * T + T * T + 600.0 * C - 330.0 * ePrime2) * A * A * A * A * A * A / 720.0));
+            
+    if (lat < 0) y += 10000000.0;
+    
+    if (!utmZone) {
+      utmZone = { zone: zone, isSouth: lat < 0 };
+    }
+    
+    return { x: x, y: y };
+  }
+
+  // عند النقر: يتم ملء الخانات تلقائياً + إضافة الدبوس والحساب فوراً
   map.on('click', function(e) {                                                             
-    addPoint(e.latlng.lat, e.latlng.lng, 0);
+    var lat = e.latlng.lat;
+    var lng = e.latlng.lng;
+    
+    document.getElementById('manLat').value = lat.toFixed(7);
+    document.getElementById('manLng').value = lng.toFixed(7);
+    
+    addPoint(lat, lng, 0);
   });                                                                                   
   
-  function toUTM(lat, lng){
-    if (!utmZone) utmZone = pickUtmZone(lat, lng);                                          
-    var r = proj4('WGS84', utmZone.def, [lng, lat]);
-    return { x: r[0], y: r[1] };                                                            
-  }
-                                                                                          
   function numberedIcon(id){
     return L.divIcon({                                                                        
       className: 'point-marker',
@@ -229,7 +256,6 @@
     var marker = L.marker([lat,lng], { draggable: true, icon: numberedIcon(id) }).addTo(map);
     var pt = { id: id, lat: lat, lng: lng, elev: elev || 0, marker: marker };                  
     
-    // عند تحريك الدبوس باليد، يتم تحديث الحسابات تلقائياً بدقة بالغة
     marker.on('dragend', function(){                                                          
       var ll = marker.getLatLng();
       pt.lat = ll.lat; 
@@ -237,7 +263,8 @@
       recalcAll();
     });                                                                                     
     points.push(pt);
-    recalcAll();                                                                          }
+    recalcAll();                                                                          
+  }
                                                                                           
   function deletePoint(id){
     var idx = points.findIndex(function(p){ return p.id === id; });                         
@@ -293,23 +320,27 @@
   }                                                                                     
   
   function recalcAll(){                                                                     
-    var utm = points.map(function(p){ return toUTM(p.lat,p.lng); });
-    var closed = points.length >= 3;                                                    
-    var segDist = [], segAz = [];                                                           
-    for (var i=0; i<points.length; i++){
-      var hasNext = (i < points.length-1) || closed;                                          
-      if (!hasNext){ segDist.push(null); segAz.push(null); continue; }
-      var j = (i+1) % points.length;
-      segDist.push(dist(utm[i], utm[j]));                                                     
-      segAz.push(azimuthDeg(utm[i], utm[j]));
+    try {
+      var utm = points.map(function(p){ return toUTM(p.lat,p.lng); });
+      var closed = points.length >= 3;                                                    
+      var segDist = [], segAz = [];                                                           
+      for (var i=0; i<points.length; i++){
+        var hasNext = (i < points.length-1) || closed;                                          
+        if (!hasNext){ segDist.push(null); segAz.push(null); continue; }
+        var j = (i+1) % points.length;
+        segDist.push(dist(utm[i], utm[j]));                                                     
+        segAz.push(azimuthDeg(utm[i], utm[j]));
+      }
+      var perimeter = segDist.reduce(function(s,v){ return s + (v||0); }, 0);
+      var area = closed ? shoelaceArea(utm) : 0;                                                                                                                                      
+      
+      renderReadout(area, perimeter, closed);
+      renderTable(utm, segDist, segAz);                                                       
+      renderMapShape(closed);                                                                 
+      document.getElementById('pointCountBadge').textContent = points.length;
+    } catch(err) {
+      console.error(err);
     }
-    var perimeter = segDist.reduce(function(s,v){ return s + (v||0); }, 0);
-    var area = closed ? shoelaceArea(utm) : 0;                                                                                                                                      
-    
-    renderReadout(area, perimeter, closed);
-    renderTable(utm, segDist, segAz);                                                       
-    renderMapShape(closed);                                                                 
-    document.getElementById('pointCountBadge').textContent = points.length;
   }                                                                                     
   
   function renderReadout(area, perimeter, closed){
