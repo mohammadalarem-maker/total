@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطبيق المسح العقاري والمساحة - قوقل إيرث</title>
-  
+  <title>تطبيق المسح العقاري والمساحة - قوقل إيرث</title>                               
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-  <style>
+  <style>                                                                                   
     body {
       font-family: system-ui, -apple-system, sans-serif;
       margin: 0; padding: 0;
@@ -20,69 +17,91 @@
       display: flex; flex-direction: column; height: 100vh;
     }
     header {
-      background-color: #2c3e50; color: white;
-      padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
+      background-color: #1a2d42; color: white;
+      padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }                                                                                       
+    .badge-box {
+      background-color: #e74c3c; padding: 6px 12px; border-radius: 8px; 
+      text-align: center; font-size: 13px; font-weight: bold; min-width: 60px;
     }
+    .badge-box div { font-size: 16px; margin-top: 2px; }
     .main-container {
       display: flex; flex: 1; overflow: hidden;
-    }
-    #map {
+    }                                                                                       
+    #map {                                                                                    
       flex: 1; height: 100%;
-    }
+    }                                                                                       
     .sidebar {
-      width: 400px; background: white; border-left: 1px solid #ddd;
-      display: flex; flex-direction: column; overflow-y: auto; padding: 15px;
-    }
+      width: 380px; background: white; border-left: 1px solid #ddd;                           
+      display: flex; flex-direction: column; overflow-y: auto; padding: 15px; box-sizing: border-box;
+    }                                                                                       
     .card {
-      background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 6px;
-      padding: 12px; margin-bottom: 15px;
+      background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 8px;
+      padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .card h3 { margin-top: 0; color: #34495e; font-size: 16px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
-    .input-group { display: flex; gap: 5px; margin-bottom: 8px; }
-    .input-group input { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
-    button {
-      background-color: #3498db; color: white; border: none; padding: 8px 12px;
-      border-radius: 4px; cursor: pointer; font-weight: bold;
+    .card h3 { margin-top: 0; color: #2c3e50; font-size: 15px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+    .input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+    .input-group input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 14px; }
+    
+    button {                                                                                  
+      background-color: #3498db; color: white; border: none; padding: 10px 12px;
+      border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px;
+      transition: background 0.2s;
     }
     button:hover { background-color: #2980b9; }
+    .btn-orange { background-color: #f39c12; }
+    .btn-orange:hover { background-color: #d35400; }
     .btn-danger { background-color: #e74c3c; }
     .btn-danger:hover { background-color: #c0392b; }
     .danger-armed { background-color: #d35400 !important; }
-    .status-pill {
-      display: inline-block; padding: 2px 8px; border-radius: 12px;
-      background-color: #2ecc71; color: white; font-size: 12px;
+    
+    .status-pill {                                                                            
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      background-color: #2ecc71; color: white; font-size: 12px; font-weight: bold;
     }
     .status-pill.open { background-color: #f1c40f; color: #333; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
-    th { background-color: #f2f2f2; }
-    .elev-input { width: 50px; text-align: center; }
-    .del-btn { background: none; color: #e74c3c; border: none; cursor: pointer; font-size: 14px; }
     
-    /* ستايل الدبوس الرقمي ليكون واضحاً جداً فوق خريطة القمر الصناعي */
-    .point-marker .pm-circle {
+    .report-text { font-size: 18px; margin: 8px 0; color: #2c3e50; }
+    .report-sub { font-size: 13px; color: #7f8c8d; margin: -5px 0 10px 0; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }                                                                                            
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }                    
+    th { background-color: #f8f9fa; color: #333; }                                                       
+    .elev-input { width: 55px; text-align: center; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
+    .del-btn { background: none; color: #e74c3c; border: none; cursor: pointer; font-size: 14px; padding: 0; }
+
+    .point-marker .pm-circle {                                                                
       width: 24px; height: 24px; background: #e74c3c; color: white;
-      border-radius: 50%; text-align: center; line-height: 24px;
-      font-size: 12px; font-weight: bold; border: 2px solid #fff; 
-      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      border-radius: 50%; text-align: center; line-height: 24px;                              
+      font-size: 12px; font-weight: bold; border: 2px solid #fff;
+      box-shadow: 0 0 6px rgba(0,0,0,0.5);                                                  
     }
-    .point-marker .pm-circle.fresh { background: #2ecc71; }
-    .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* التوافق التام مع شاشات الهواتف الذكية (Android App View) */
+    @media (max-width: 768px) {
+      .main-container { flex-direction: column; overflow-y: auto; }
+      #map { height: 45vh; width: 100%; flex: none; }
+      .sidebar { width: 100%; border-left: none; overflow-y: visible; padding: 12px; }
+    }
   </style>
 </head>
 <body>
 
 <header>
   <h2>نظام رفع ومسح الإحداثيات المساحية (قوقل إيرث)</h2>
-  <span id="pointCountBadge" style="background:#e74c3c; padding:5px 10px; border-radius:15px; font-size:14px;">النقاط: 0</span>
-</header>
+  <div class="badge-box">
+    النقاط
+    <div id="pointCountBadge">0</div>
+  </div>
+</header>                                                                                                                                                                       
 
-<div class="main-container">
+<div class="main-container">                                                              
   <div id="map"></div>
-
+  
   <div class="sidebar">
-    
-    <div class="card">
+    <div class="card">                                                                        
       <h3>الذهاب إلى موقع</h3>
       <div class="input-group">
         <input type="number" id="goLat" placeholder="خط العرض Lat" step="any">
@@ -90,270 +109,269 @@
       </div>
       <button id="goBtn" style="width:100%;">انتقال</button>
     </div>
-
+                                                                                            
     <div class="card">
-      <h3>إضافة نقطة يدوياً</h3>
-      <div class="input-group">
-        <input type="number" id="manLat" placeholder="خط العرض" step="any">
+      <h3>إضافة نقطة يدوياً</h3>                                                               
+      <div class="input-group">                                                                 
+        <input type="number" id="manLat" placeholder="خط العرض" step="any">                     
         <input type="number" id="manLng" placeholder="خط الطول" step="any">
-        <input type="number" id="manElev" placeholder="الارتفاع Z" step="any">
       </div>
-      <button id="manAddBtn" style="width:100%;">إضافة النقطة</button>
-    </div>
-
-    <div class="card">
-      <h3>التقرير المساحي</h3>
-      <p>المساحة: <strong id="roArea">0</strong></p>
-      <p style="font-size: 12px; color: #7f8c8d;" id="roAreaSub">0 هكتار · 0 دونم</p>
-      <p>المحيط: <strong id="roPerimeter">0</strong></p>
-      <p>عدد النقاط: <strong id="roCount">0</strong> | زون الـ UTM: <strong id="roZone">—</strong></p>
-      <p>حالة المضلع: <span id="roStatus" class="status-pill open">مفتوح</span></p>
       <div class="input-group">
-        <button id="undoBtn" style="flex:1; background:#f39c12;">تراجع ↩</button>
-        <button id="clearBtn" class="btn-danger" style="flex:1;">🗑️ مسح الكل</button>
+        <input type="number" id="manElev" placeholder="الارتفاع Z (اختياري)" step="any">                
       </div>
+      <button id="manAddBtn" style="width:100%;">إضافة النقطة</button>                      
+    </div>
+                                                                                            
+    <div class="card">
+      <h3>التقرير المساحي</h3>                                                                
+      <div class="report-text">المساحة: <strong id="roArea">0.00 م²</strong></div>
+      <div class="report-sub" id="roAreaSub">0.0000 هكتار · 0.000 دونم</div>         
+      <div class="report-text">المحيط: <strong id="roPerimeter">0.00 م</strong></div>                                      
+      <p style="font-size: 13px; color: #2c3e50;">عدد النقاط: <strong id="roCount">0</strong> | زون الـ UTM: <strong id="roZone">—</strong></p>                                                                                
+      <p style="font-size: 13px; color: #2c3e50;">حالة المضلع: <span id="roStatus" class="status-pill open">مفتوح</span></p>
+      <div class="input-group">                                                                 
+        <button id="undoBtn" class="btn-orange" style="flex:1;">تراجع ↩</button>
+        <button id="clearBtn" class="btn-danger" style="flex:1;">🗑️ مسح الكل</button>
+      </div>                                                                                
     </div>
 
     <div class="card">
       <h3>تصدير البيانات المساحية</h3>
-      <div class="export-grid">
+      <div class="export-grid">                                                                 
         <button id="expKML">تصدير KML</button>
         <button id="expDXF">تصدير AutoCAD DXF</button>
-        <button id="expCSV">تصدير CSV</button>
+        <button id="expCSV">تصدير CSV</button>                                                  
         <button id="expTXT">تصدير PNEZD (TXT)</button>
       </div>
-      <button id="expZIP" style="width:100%; margin-top:8px; background:#27ae60;">تصدير الكل في ملف ZIP 📦</button>
+      <button id="expZIP" style="width:100%; margin-top:10px; background:#2ecc71;">تصدير الكل في ملف ZIP 📦</button>                                                                 
     </div>
-
+                                                                                            
     <div class="card" style="flex:1; overflow-y:auto;">
-      <h3>جدول النقاط والإحداثيات</h3>
+      <h3>جدول النقاط والإحداثيات</h3>                                                        
       <table>
         <thead>
-          <tr>
+          <tr>                                                                                      
             <th>ID</th>
-            <th>Easting (X)</th>
-            <th>Northing (Y)</th>
-            <th>الارتفاع (Z)</th>
-            <th>المسافة (م)</th>
-            <th>الانحراف</th>
+            <th>Easting (X)</th>                                                                    
+            <th>Northing (Y)</th>                                                                   
+            <th>الارتفاع (Z)</th>                                                                   
+            <th>المسافة (م)</th>                                                                    
+            <th>الانحراف</th>                                                                       
             <th>حذف</th>
-          </tr>
+          </tr>                                                                                 
         </thead>
-        <tbody id="pointsBody">
-          <tr class="empty-row"><td colspan="7">انقر على خريطة قوقل إيرث لإسقاط الدبابيس...</td></tr>
+        <tbody id="pointsBody">                                                                   
+          <tr class="empty-row"><td colspan="7">انقر على خريطة قوقل إيرث لإسقاط الدبابيس...</td></tr>                                                                                   
         </tbody>
-      </table>
+      </table>                                                                              
     </div>
-
   </div>
-</div>
+</div>                                                                                  
 
 <script>
-(function(){
-  // تهيئة طبقات الخرائط
+(function(){                                                                              
+  // طبقة خريطة الشوارع الافتراضية
   var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-  
-  // خريطة قوقل إيرث (الأقمار الصناعية الهجينة مع أسماء الشوارع والمواقع)
-  var googleEarth = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-    maxZoom: 22,
+                                                                                          
+  // طبقة خرائط قوقل إيرث الهجينة (أقمار صناعية فائقة الدقة مع أسماء المعالم)
+  var googleEarth = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {     
+    maxZoom: 22,                                                                            
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: 'Map data ©Google Earth'
-  });
-
-  // إنشاء الخريطة وجعل قوقل إيرث هي الافتراضية
+    attribution: 'Map data ©Google Earth'                                                 
+  });                                                                                   
+  
+  // تهيئة الخريطة وجعل قوقل إيرث الطبقة الافتراضية للرفع المساحي
   var map = L.map('map', {
-    center: [24.7136, 46.6753],
+    center: [24.7136, 46.6753],                                                             
     zoom: 6,
-    layers: [googleEarth]
-  });
-
-  // إضافة أداة التبديل بين الخرائط في الأعلى يميناً
-  var baseMaps = {
+    layers: [googleEarth]                                                                 
+  });                                                                                                                                                                             
+  
+  var baseMaps = {                                                                          
     "خرائط قوقل إيرث (ساتلايت) 🌍": googleEarth,
-    "خريطة الشوارع العادية (OSM) 🗺️": osm
+    "خريطة الشوارع العادية (OSM) 🗺️": osm                                                  
   };
-  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
-
+  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);                                                                                                          
+  
   var points = [];
-  var nextId = 1;
+  var nextId = 1;                                                                         
   var utmZone = null;
-  var polyShape = null;
-
+  var polyShape = null;                                                                                                                                                           
+  
   function pickUtmZone(lat, lng) {
-    var zone = Math.floor((lng + 180) / 6) + 1;
+    var zone = Math.floor((lng + 180) / 6) + 1;                                             
     var isSouth = lat < 0;
-    var def = '+proj=utm +zone=' + zone + (isSouth ? ' +south' : '') + ' +datum=WGS84 +units=m +no_defs';
-    return { zone: zone, isSouth: isSouth, def: def };
-  }
-
-  // عند النقر على خريطة قوقل إيرث يتم إسقاط دبوس
-  map.on('click', function(e) {
+    var def = '+proj=utm +zone=' + zone + (isSouth ? ' +south' : '') + ' +datum=WGS84 +units=m +no_defs';                                                                           
+    return { zone: zone, isSouth: isSouth, def: def };                                    
+  }                                                                                                                                                                               
+  
+  // التفاعل مع النقرات لإسقاط الدبابيس وحساب المساحات مباشرة
+  map.on('click', function(e) {                                                             
     addPoint(e.latlng.lat, e.latlng.lng, 0);
-  });
-
+  });                                                                                   
+  
   function toUTM(lat, lng){
-    if (!utmZone) utmZone = pickUtmZone(lat, lng);
+    if (!utmZone) utmZone = pickUtmZone(lat, lng);                                          
     var r = proj4('WGS84', utmZone.def, [lng, lat]);
-    return { x:r[0], y:r[1] };
+    return { x: r[0], y: r[1] };                                                            
   }
-
-  function numberedIcon(id, fresh){
-    return L.divIcon({
-      className:'point-marker',
-      html:'<div class="pm-circle' + (fresh ? ' fresh' : '') + '">' + id + '</div>',
-      iconSize:[30,30], iconAnchor:[15,15]
-    });
-  }
-
-  function addPoint(lat, lng, elev){
+                                                                                          
+  function numberedIcon(id){
+    return L.divIcon({                                                                        
+      className: 'point-marker',
+      html: '<div class="pm-circle">' + id + '</div>',          
+      iconSize: [30,30], iconAnchor: [15,15]                                                  
+    });                                                                                   
+  }                                                                                     
+  
+  function addPoint(lat, lng, elev){                                                        
     var id = nextId++;
-    var marker = L.marker([lat,lng], { draggable:true, icon:numberedIcon(id,true) }).addTo(map);
-    var pt = { id:id, lat:lat, lng:lng, elev:elev||0, marker:marker };
+    var marker = L.marker([lat,lng], { draggable: true, icon: numberedIcon(id) }).addTo(map);
+    var pt = { id: id, lat: lat, lng: lng, elev: elev || 0, marker: marker };                  
     
-    // إمكانية سحب الدبوس وتعديل مكانه بدقة على القمر الصناعي
-    marker.on('dragend', function(){
+    // عند تحريك الدبوس باليد، يتم تحديث الحسابات تلقائياً بدقة بالغة
+    marker.on('dragend', function(){                                                          
       var ll = marker.getLatLng();
-      pt.lat = ll.lat; pt.lng = ll.lng;
+      pt.lat = ll.lat; 
+      pt.lng = ll.lng;                                                       
       recalcAll();
-    });
+    });                                                                                     
     points.push(pt);
-    recalcAll();
-  }
-
+    recalcAll();                                                                          }
+                                                                                          
   function deletePoint(id){
-    var idx = points.findIndex(function(p){ return p.id === id; });
+    var idx = points.findIndex(function(p){ return p.id === id; });                         
     if (idx === -1) return;
-    map.removeLayer(points[idx].marker);
+    map.removeLayer(points[idx].marker);                                                    
     points.splice(idx,1);
-    if (points.length === 0) utmZone = null;
-    recalcAll();
-  }
-
-  function undoLast(){
+    if (points.length === 0) utmZone = null;                                                
+    recalcAll();                                                                          
+  }                                                                                     
+  
+  function undoLast(){                                                                      
     if (points.length === 0) return;
-    var last = points.pop();
-    map.removeLayer(last.marker);
-    if (points.length === 0) utmZone = null;
-    recalcAll();
+    var last = points.pop();                                                                
+    map.removeLayer(last.marker);                                                           
+    if (points.length === 0) utmZone = null;                                                
+    recalcAll();                                                                          
   }
-
+                                                                                          
   function clearAll(){
     points.forEach(function(p){ map.removeLayer(p.marker); });
-    points = [];
+    points = [];                                                                            
     utmZone = null;
     recalcAll();
   }
-
+                                                                                          
   function dist(a,b){ var dx=b.x-a.x, dy=b.y-a.y; return Math.sqrt(dx*dx+dy*dy); }
 
-  function azimuthDeg(a,b){
-    var dx=b.x-a.x, dy=b.y-a.y;
-    var az = Math.atan2(dx,dy) * 180/Math.PI;
-    if (az < 0) az += 360;
-    return az;
+  function azimuthDeg(a,b){                                                                 
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var az = Math.atan2(dx,dy) * 180 / Math.PI;                                               
+    if (az < 0) az += 360;                                                                  
+    return az;                                                                            
   }
-
+                                                                                          
   function toDMS(deg){
     var d = Math.floor(deg);
     var minF = (deg-d)*60;
-    var m = Math.floor(minF);
+    var m = Math.floor(minF);                                                               
     var s = Math.round((minF-m)*60);
-    if (s === 60){ s=0; m+=1; }
+    if (s === 60){ s=0; m+=1; }                                                             
     if (m === 60){ m=0; d+=1; }
-    function pad(n,len){ var s=String(Math.abs(n)); while(s.length<len) s='0'+s; return s; }
+    function pad(n,len){ var s=String(Math.abs(n)); while(s.length<len) s='0'+s; return s; }                                                                                        
     return pad(d,3) + '°' + pad(m,2) + "'" + pad(s,2) + '"';
-  }
-
-  function shoelaceArea(utmPts){
+  }                                                                                     
+  
+  function shoelaceArea(utmPts){                                                            
     var area = 0, n = utmPts.length;
-    for (var i=0;i<n;i++){
-      var j=(i+1)%n;
-      area += utmPts[i].x*utmPts[j].y - utmPts[j].x*utmPts[i].y;
-    }
+    for (var i=0; i<n; i++){
+      var j = (i+1) % n;                                                                          
+      area += utmPts[i].x * utmPts[j].y - utmPts[j].x * utmPts[i].y;
+    }                                                                                       
     return Math.abs(area/2);
-  }
-
-  function recalcAll(){
+  }                                                                                     
+  
+  function recalcAll(){                                                                     
     var utm = points.map(function(p){ return toUTM(p.lat,p.lng); });
-    var closed = points.length >= 3;
-
-    var segDist = [], segAz = [];
-    for (var i=0;i<points.length;i++){
-      var hasNext = (i < points.length-1) || closed;
+    var closed = points.length >= 3;                                                    
+    var segDist = [], segAz = [];                                                           
+    for (var i=0; i<points.length; i++){
+      var hasNext = (i < points.length-1) || closed;                                          
       if (!hasNext){ segDist.push(null); segAz.push(null); continue; }
       var j = (i+1) % points.length;
-      segDist.push(dist(utm[i], utm[j]));
+      segDist.push(dist(utm[i], utm[j]));                                                     
       segAz.push(azimuthDeg(utm[i], utm[j]));
     }
     var perimeter = segDist.reduce(function(s,v){ return s + (v||0); }, 0);
-    var area = closed ? shoelaceArea(utm) : 0;
-
+    var area = closed ? shoelaceArea(utm) : 0;                                                                                                                                      
+    
     renderReadout(area, perimeter, closed);
-    renderTable(utm, segDist, segAz);
-    renderMapShape(closed);
-    document.getElementById('pointCountBadge').textContent = 'النقاط: ' + points.length;
-  }
-
+    renderTable(utm, segDist, segAz);                                                       
+    renderMapShape(closed);                                                                 
+    document.getElementById('pointCountBadge').textContent = points.length;
+  }                                                                                     
+  
   function renderReadout(area, perimeter, closed){
-    document.getElementById('roArea').textContent = area.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م²';
+    document.getElementById('roArea').textContent = area.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م²';                                         
     document.getElementById('roAreaSub').textContent =
       (area/10000).toLocaleString('en-US',{minimumFractionDigits:4,maximumFractionDigits:4}) + ' هكتار · ' +
       (area/1000).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' دونم';
     document.getElementById('roPerimeter').textContent = perimeter.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م';
     document.getElementById('roCount').textContent = points.length;
-    document.getElementById('roZone').textContent = utmZone ? ('UTM ' + utmZone.zone + (utmZone.isSouth?'S':'N')) : '—';
+    document.getElementById('roZone').textContent = utmZone ? ('UTM ' + utmZone.zone + (utmZone.isSouth?'S':'N')) : '—';                                                            
     var st = document.getElementById('roStatus');
-    st.textContent = closed ? 'مغلق' : 'مفتوح';
-    st.className = closed ? 'status-pill' : 'status-pill open';
-  }
-
+    st.textContent = closed ? 'مغلق' : 'مفتوح';                                             
+    st.className = closed ? 'status-pill' : 'status-pill open';                           
+  }                                                                                                                                                                               
+  
   function renderTable(utm, segDist, segAz){
     var body = document.getElementById('pointsBody');
-    if (points.length === 0){
+    if (points.length === 0){                                                                 
       body.innerHTML = '<tr class="empty-row"><td colspan="7">انقر على خريطة قوقل إيرث لإسقاط الدبابيس...</td></tr>';
-      return;
-    }
-    var rows = points.map(function(p, i){
-      var u = utm[i];
-      var d = segDist[i], az = segAz[i];
-      return '<tr>' +
+      return;                                                                               
+    }                                                                                       
+    var rows = points.map(function(p, i){                                                     
+      var u = utm[i];                                                                         
+      var d = segDist[i], az = segAz[i];                                                      
+      return '<tr>' +                                                                           
         '<td>P' + p.id + '</td>' +
-        '<td>' + u.x.toFixed(3) + '</td>' +
-        '<td>' + u.y.toFixed(3) + '</td>' +
+        '<td>' + u.x.toFixed(3) + '</td>' +                                                     
+        '<td>' + u.y.toFixed(3) + '</td>' +                                                     
         '<td><input class="elev-input" type="number" step="any" value="' + p.elev + '" data-id="' + p.id + '" /></td>' +
-        '<td>' + (d===null ? '—' : d.toFixed(2)) + '</td>' +
+        '<td>' + (d===null ? '—' : d.toFixed(2)) + '</td>' +                                    
         '<td>' + (az===null ? '—' : toDMS(az)) + '</td>' +
-        '<td><button class="del-btn" data-id="' + p.id + '" title="حذف">❌</button></td>' +
+        '<td><button class="del-btn" data-id="' + p.id + '" title="حذف">❌</button></td>' +                                                                                             
         '</tr>';
-    }).join('');
+    }).join('');                                                                            
     body.innerHTML = rows;
-
+                                                                                            
     body.querySelectorAll('.del-btn').forEach(function(btn){
       btn.addEventListener('click', function(){ deletePoint(parseInt(btn.dataset.id,10)); });
-    });
-    body.querySelectorAll('.elev-input').forEach(function(inp){
+    });                                                                                     
+    body.querySelectorAll('.elev-input').forEach(function(inp){                               
       inp.addEventListener('change', function(){
-        var p = points.find(function(pt){ return pt.id === parseInt(inp.dataset.id,10); });
+        var p = points.find(function(pt){ return pt.id === parseInt(inp.dataset.id,10); });                                                                                             
         if (p) p.elev = parseFloat(inp.value) || 0;
-      });
-    });
-  }
-
-  function renderMapShape(closed){
-    if (polyShape){ map.removeLayer(polyShape); polyShape = null; }
-    if (points.length < 2) return;
+      });                                                                                   
+    });                                                                                     
+  }                                                                                     
+  
+  function renderMapShape(closed){                                                          
+    if (polyShape){ map.removeLayer(polyShape); polyShape = null; }                         
+    if (points.length < 2) return;                                                          
     var latlngs = points.map(function(p){ return [p.lat,p.lng]; });
-    if (closed){
-      polyShape = L.polygon(latlngs, { color:'#00E676', weight:3, fillColor:'#00E676', fillOpacity:0.25 }).addTo(map);
-    } else {
-      polyShape = L.polyline(latlngs, { color:'#00E676', weight:3 }).addTo(map);
-    }
+    if (closed){                                                                              
+      polyShape = L.polygon(latlngs, { color: '#00E676', weight: 3, fillColor: '#00E676', fillOpacity: 0.25 }).addTo(map);                                                              
+    } else {                                                                                  
+      polyShape = L.polyline(latlngs, { color: '#00E676', weight: 3 }).addTo(map);            
+    }                                                                                     
   }
-
+                                                                                          
   function buildKML(){
-    var placemarks = points.map(function(p){
-      return '<Placemark><name>P' + p.id + '</name><description>Z=' + p.elev + '</description>' +
-        '<Point><coordinates>' + p.lng + ',' + p.lat + ',' + p.elev + '</coordinates></Point></Placemark>';
+    var placemarks = points.map(function(p){                                                  
+      return '<Placemark><name>P' + p.id + '</name><description>Z=' + p.elev + '</description>' +                                                                                       
+             '<Point><coordinates>' + p.lng + ',' + p.lat + ',' + p.elev + '</coordinates></Point></Placemark>';                                                                         
     }).join('\n');
     var polygonKml = '';
     if (points.length >= 3){
@@ -366,81 +384,81 @@
     return '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>مسح الموقع</name>\n' +
       placemarks + '\n' + polygonKml + '\n</Document></kml>';
   }
-
+                                                                                          
   function buildDXF(){
-    var entities = '';
+    var entities = '';                                                                      
     points.forEach(function(p){
       var u = toUTM(p.lat,p.lng);
       entities += '0\nPOINT\n8\nPOINTS\n10\n' + u.x.toFixed(3) + '\n20\n' + u.y.toFixed(3) + '\n30\n' + p.elev.toFixed(3) + '\n';
       entities += '0\nTEXT\n8\nLABELS\n10\n' + (u.x+0.6).toFixed(3) + '\n20\n' + (u.y+0.6).toFixed(3) + '\n30\n0\n40\n1.0\n1\nP' + p.id + '\n';
     });
     if (points.length >= 2){
-      var closedFlag = points.length >= 3 ? 1 : 0;
+      var closedFlag = points.length >= 3 ? 1 : 0;                                            
       entities += '0\nPOLYLINE\n8\nBOUNDARY\n66\n1\n70\n' + closedFlag + '\n';
-      points.forEach(function(p){
+      points.forEach(function(p){                                                               
         var u = toUTM(p.lat,p.lng);
-        entities += '0\nVERTEX\n8\nBOUNDARY\n10\n' + u.x.toFixed(3) + '\n20\n' + u.y.toFixed(3) + '\n30\n' + p.elev.toFixed(3) + '\n';
+        entities += '0\nVERTEX\n8\nBOUNDARY\n10\n' + u.x.toFixed(3) + '\n20\n' + u.y.toFixed(3) + '\n30\n' + p.elev.toFixed(3) + '\n';                                                
       });
-      entities += '0\nSEQEND\n';
+      entities += '0\nSEQEND\n';                                                            
     }
     return '0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n' +
       entities + '0\nENDSEC\n0\nEOF\n';
-  }
-
-  function buildCSV(){
+  }                                                                                     
+  
+  function buildCSV(){                                                                      
     var rows = ['Point,Lat,Lon,Easting,Northing,Elevation'];
-    points.forEach(function(p){
+    points.forEach(function(p){                                                               
       var u = toUTM(p.lat,p.lng);
-      rows.push(['P'+p.id, p.lat.toFixed(7), p.lng.toFixed(7), u.x.toFixed(3), u.y.toFixed(3), p.elev.toFixed(3)].join(','));
+      rows.push(['P'+p.id, p.lat.toFixed(7), p.lng.toFixed(7), u.x.toFixed(3), u.y.toFixed(3), p.elev.toFixed(3)].join(','));                                                       
     });
     return rows.join('\n');
   }
 
-  function buildTXT(){
+  function buildTXT(){                                                                      
     var rows = [];
     points.forEach(function(p){
       var u = toUTM(p.lat,p.lng);
-      rows.push([p.id, u.y.toFixed(3), u.x.toFixed(3), p.elev.toFixed(3), 'P'+p.id].join(','));
+      rows.push([p.id, u.y.toFixed(3), u.x.toFixed(3), p.elev.toFixed(3), 'P'+p.id].join(','));                                                                                     
     });
     return rows.join('\n');
   }
 
   function downloadFile(content, filename, mime){
-    var blob = new Blob([content], { type:mime });
+    var blob = new Blob([content], { type: mime });                                          
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
-    a.href = url; a.download = filename;
+    a.href = url; a.download = filename;                                                    
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
+    URL.revokeObjectURL(url);                                                             
+  }                                                                                     
+  
   function guardEmpty(){
-    if (points.length === 0){
+    if (points.length === 0){                                                                 
       alert('أضف نقطة واحدة على الأقل قبل التصدير.');
       return true;
     }
-    return false;
+    return false;                                                                         
   }
 
-  document.getElementById('manAddBtn').addEventListener('click', function(){
-    var lat = parseFloat(document.getElementById('manLat').value);
+  document.getElementById('manAddBtn').addEventListener('click', function(){                
+    var lat = parseFloat(document.getElementById('manLat').value);                          
     var lng = parseFloat(document.getElementById('manLng').value);
     var elev = parseFloat(document.getElementById('manElev').value) || 0;
     if (isNaN(lat) || isNaN(lng) || lat<-90 || lat>90 || lng<-180 || lng>180){
-      alert('أدخل خط عرض (-90 إلى 90) وخط طول (-180 إلى 180) صحيحين.');
+      alert('أدخل خط عرض (-90 إلى 90) وخط طول (-180 إلى 180) صحيحين.');                       
       return;
     }
     addPoint(lat,lng,elev);
     map.panTo([lat,lng]);
   });
 
-  document.getElementById('goBtn').addEventListener('click', function(){
+  document.getElementById('goBtn').addEventListener('click', function(){                    
     var lat = parseFloat(document.getElementById('goLat').value);
     var lng = parseFloat(document.getElementById('goLng').value);
-    if (isNaN(lat) || isNaN(lng)) return;
-    map.setView([lat,lng], 18); // زووم قريّب لرؤية الأرض بوضوح
-  });
-
+    if (isNaN(lat) || isNaN(lng)) return;                                                   
+    map.setView([lat,lng], 18);                                                            
+  });                                                                                                                                                                             
+  
   document.getElementById('undoBtn').addEventListener('click', undoLast);
 
   var clearBtn = document.getElementById('clearBtn');
@@ -448,44 +466,39 @@
   clearBtn.addEventListener('click', function(){
     if (!clearArmed){
       clearArmed = true;
-      clearBtn.textContent = 'اضغط للتأكيد';
+      clearBtn.textContent = 'اضغط للتأكيد';                                                  
       clearBtn.classList.add('danger-armed');
-      clearTimer = setTimeout(function(){
+      clearTimer = setTimeout(function(){                                                       
         clearArmed = false;
         clearBtn.textContent = '🗑️ مسح الكل';
         clearBtn.classList.remove('danger-armed');
       }, 3000);
     } else {
-      clearTimeout(clearTimer);
       clearArmed = false;
       clearBtn.textContent = '🗑️ مسح الكل';
       clearBtn.classList.remove('danger-armed');
+      clearTimeout(clearTimer);
       clearAll();
     }
   });
 
-  document.getElementById('expKML').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildKML(),'survey.kml','application/vnd.google-earth.kml+xml'); });
-  document.getElementById('expDXF').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildDXF(),'survey.dxf','application/dxf'); });
-  document.getElementById('expCSV').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildCSV(),'survey.csv','text/csv'); });
-  document.getElementById('expTXT').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildTXT(),'survey_PNEZD.txt','text/plain'); });
+  document.getElementById('expKML').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildKML(), 'survey_export.kml', 'application/vnd.google-earth.kml+xml'); });
+  document.getElementById('expDXF').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildDXF(), 'survey_export.dxf', 'image/vnd.dxf'); });
+  document.getElementById('expCSV').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildCSV(), 'survey_export.csv', 'text/csv'); });
+  document.getElementById('expTXT').addEventListener('click', function(){ if(!guardEmpty()) downloadFile(buildTXT(), 'survey_export.txt', 'text/plain'); });
 
   document.getElementById('expZIP').addEventListener('click', function(){
-    if (guardEmpty()) return;
+    if(guardEmpty()) return;
     var zip = new JSZip();
-    zip.file('survey.kml', buildKML());
-    zip.file('survey.dxf', buildDXF());
-    zip.file('survey.csv', buildCSV());
-    zip.file('survey_PNEZD.txt', buildTXT());
-    zip.generateAsync({ type:'blob' }).then(function(blob){
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = 'survey_export.zip';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    zip.file("survey_export.kml", buildKML());
+    zip.file("survey_export.dxf", buildDXF());
+    zip.file("survey_export.csv", buildCSV());
+    zip.file("survey_export.txt", buildTXT());
+    zip.generateAsync({type:"blob"}).then(function(content) {
+      downloadFile(content, "all_survey_exports.zip", "application/zip");
     });
   });
 
-  recalcAll();
 })();
 </script>
 </body>
