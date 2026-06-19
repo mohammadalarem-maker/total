@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطبيق المسح العقاري والمساحة</title>
+  <title>تطبيق المسح العقاري والمساحة - قوقل إيرث</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -58,10 +58,13 @@
     th { background-color: #f2f2f2; }
     .elev-input { width: 50px; text-align: center; }
     .del-btn { background: none; color: #e74c3c; border: none; cursor: pointer; font-size: 14px; }
+    
+    /* ستايل الدبوس الرقمي ليكون واضحاً جداً فوق خريطة القمر الصناعي */
     .point-marker .pm-circle {
-      width: 20px; height: 20px; background: #e74c3c; color: white;
-      border-radius: 50%; text-align: center; line-height: 20px;
-      font-size: 11px; font-weight: bold; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);
+      width: 24px; height: 24px; background: #e74c3c; color: white;
+      border-radius: 50%; text-align: center; line-height: 24px;
+      font-size: 12px; font-weight: bold; border: 2px solid #fff; 
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
     }
     .point-marker .pm-circle.fresh { background: #2ecc71; }
     .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
@@ -70,7 +73,7 @@
 <body>
 
 <header>
-  <h2>نظام رفع ومسح الإحداثيات المساحية</h2>
+  <h2>نظام رفع ومسح الإحداثيات المساحية (قوقل إيرث)</h2>
   <span id="pointCountBadge" style="background:#e74c3c; padding:5px 10px; border-radius:15px; font-size:14px;">النقاط: 0</span>
 </header>
 
@@ -137,7 +140,7 @@
           </tr>
         </thead>
         <tbody id="pointsBody">
-          <tr class="empty-row"><td colspan="7">لا توجد نقاط بعد ... انقر على الخريطة للبدء</td></tr>
+          <tr class="empty-row"><td colspan="7">انقر على خريطة قوقل إيرث لإسقاط الدبابيس...</td></tr>
         </tbody>
       </table>
     </div>
@@ -147,8 +150,29 @@
 
 <script>
 (function(){
-  var map = L.map('map').setView([24.7136, 46.6753], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  // تهيئة طبقات الخرائط
+  var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+  
+  // خريطة قوقل إيرث (الأقمار الصناعية الهجينة مع أسماء الشوارع والمواقع)
+  var googleEarth = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    maxZoom: 22,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: 'Map data ©Google Earth'
+  });
+
+  // إنشاء الخريطة وجعل قوقل إيرث هي الافتراضية
+  var map = L.map('map', {
+    center: [24.7136, 46.6753],
+    zoom: 6,
+    layers: [googleEarth]
+  });
+
+  // إضافة أداة التبديل بين الخرائط في الأعلى يميناً
+  var baseMaps = {
+    "خرائط قوقل إيرث (ساتلايت) 🌍": googleEarth,
+    "خريطة الشوارع العادية (OSM) 🗺️": osm
+  };
+  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
   var points = [];
   var nextId = 1;
@@ -162,6 +186,7 @@
     return { zone: zone, isSouth: isSouth, def: def };
   }
 
+  // عند النقر على خريطة قوقل إيرث يتم إسقاط دبوس
   map.on('click', function(e) {
     addPoint(e.latlng.lat, e.latlng.lng, 0);
   });
@@ -176,7 +201,7 @@
     return L.divIcon({
       className:'point-marker',
       html:'<div class="pm-circle' + (fresh ? ' fresh' : '') + '">' + id + '</div>',
-      iconSize:[26,26], iconAnchor:[13,13]
+      iconSize:[30,30], iconAnchor:[15,15]
     });
   }
 
@@ -184,6 +209,8 @@
     var id = nextId++;
     var marker = L.marker([lat,lng], { draggable:true, icon:numberedIcon(id,true) }).addTo(map);
     var pt = { id:id, lat:lat, lng:lng, elev:elev||0, marker:marker };
+    
+    // إمكانية سحب الدبوس وتعديل مكانه بدقة على القمر الصناعي
     marker.on('dragend', function(){
       var ll = marker.getLatLng();
       pt.lat = ll.lat; pt.lng = ll.lng;
@@ -283,7 +310,7 @@
   function renderTable(utm, segDist, segAz){
     var body = document.getElementById('pointsBody');
     if (points.length === 0){
-      body.innerHTML = '<tr class="empty-row"><td colspan="7">لا توجد نقاط بعد ... انقر على الخريطة للبدء</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="7">انقر على خريطة قوقل إيرث لإسقاط الدبابيس...</td></tr>';
       return;
     }
     var rows = points.map(function(p, i){
@@ -317,9 +344,9 @@
     if (points.length < 2) return;
     var latlngs = points.map(function(p){ return [p.lat,p.lng]; });
     if (closed){
-      polyShape = L.polygon(latlngs, { color:'#FF6B35', weight:2, fillColor:'#FFB14E', fillOpacity:0.18 }).addTo(map);
+      polyShape = L.polygon(latlngs, { color:'#00E676', weight:3, fillColor:'#00E676', fillOpacity:0.25 }).addTo(map);
     } else {
-      polyShape = L.polyline(latlngs, { color:'#FF6B35', weight:2 }).addTo(map);
+      polyShape = L.polyline(latlngs, { color:'#00E676', weight:3 }).addTo(map);
     }
   }
 
@@ -411,7 +438,7 @@
     var lat = parseFloat(document.getElementById('goLat').value);
     var lng = parseFloat(document.getElementById('goLng').value);
     if (isNaN(lat) || isNaN(lng)) return;
-    map.setView([lat,lng], 16);
+    map.setView([lat,lng], 18); // زووم قريّب لرؤية الأرض بوضوح
   });
 
   document.getElementById('undoBtn').addEventListener('click', undoLast);
