@@ -1063,6 +1063,82 @@
 
   recalcAll();
 })();
+// === كود الحقن الذكي: الصقه قبل وسم </script> في أسفل الملف تماماً ===
+setTimeout(function() {
+  var exportGrid = document.querySelector('.export-grid');
+  
+  if (exportGrid && !document.getElementById('expPNG')) {
+    // 1. زراعة الزر الجديد تلقائياً
+    var pngBtn = document.createElement('button');
+    pngBtn.className = 'btn primary';
+    pngBtn.id = 'expPNG';
+    pngBtn.style.cssText = 'grid-column: span 2; margin-top: 4px;';
+    pngBtn.innerHTML = '📸 حفظ المخطط كصورة (PNG)';
+    exportGrid.appendChild(pngBtn);
+
+    // 2. تفعيل وظيفة الزر لتعمل مع WebView الأندرويد
+    pngBtn.addEventListener('click', function() {
+      if (!typeof points !== 'undefined' || points.length < 3) { 
+        if(typeof showToast === 'function') showToast('يرجى رسم 3 نقاط على الأقل أولاً لتوليد المخطط'); 
+        return; 
+      }
+      
+      var canvas = document.createElement('canvas');
+      canvas.width = 800; canvas.height = 800;
+      var ctx = canvas.getContext('2d');
+      
+      ctx.fillStyle = '#0B0F13'; ctx.fillRect(0, 0, 800, 800);
+      
+      var utmPts = points.map(function(p){ return typeof toUTM === 'function' ? toUTM(p.lat, p.lng) : p; });
+      var minX = Math.min.apply(null, utmPts.map(function(p){return p.x;}));
+      var maxX = Math.max.apply(null, utmPts.map(function(p){return p.x;}));
+      var minY = Math.min.apply(null, utmPts.map(function(p){return p.y;}));
+      var maxY = Math.max.apply(null, utmPts.map(function(p){return p.y;}));
+      
+      var maxRange = Math.max(maxX - minX, maxY - minY) || 1;
+      var padding = 80;
+      var scale = (800 - padding * 2) / maxRange;
+      
+      function transform(p) { return { x: padding + (p.x - minX) * scale, y: 800 - (padding + (p.y - minY) * scale) }; }
+      
+      ctx.strokeStyle = '#161D24'; ctx.lineWidth = 1;
+      for (var g = 0; g <= 800; g += 50) {
+        ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, 800); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(800, g); ctx.stroke();
+      }
+      
+      ctx.strokeStyle = '#FF6B35'; ctx.lineWidth = 4; ctx.fillStyle = 'rgba(255, 177, 78, 0.12)';
+      ctx.beginPath();
+      var p0 = transform(utmPts[0]); ctx.moveTo(p0.x, p0.y);
+      for (var i = 1; i < utmPts.length; i++) { var pi = transform(utmPts[i]); ctx.lineTo(pi.x, pi.y); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      
+      points.forEach(function(p) {
+        var pt = transform(typeof toUTM === 'function' ? toUTM(p.lat, p.lng) : p);
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 14, 0, 2*Math.PI);
+        ctx.fillStyle = '#FFB14E'; ctx.fill();
+        ctx.strokeStyle = '#1A0E08'; ctx.lineWidth = 3; ctx.stroke();
+        
+        ctx.fillStyle = '#11161C'; ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(p.id || '', pt.x, pt.y);
+      });
+      
+      // فتح نافذة الحفظ مباشرة
+      var modal = document.createElement('div');
+      modal.style.cssText = "position:fixed; inset:0; background:rgba(6,9,12,0.95); z-index:2000; display:flex; align-items:center; justify-content:center; padding:20px; direction:rtl;";
+      modal.innerHTML = '<div style="background:#161D24; border:1px solid #232B33; border-radius:12px; padding:18px; max-width:440px; width:100%; text-align:center; box-shadow: 0 8px 32px rgba(0,0,0,0.6);">' +
+        '<h3 style="margin:0 0 12px 0; color:#FFB14E; font-size:15px; display:flex; justify-content:space-between;"><span>💾 حفظ المخطط الكروكي</span><span style="cursor:pointer; color:#8B95A1; font-size:22px;" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span></h3>' +
+        '<p style="color:#8B95A1; font-size:12px; margin:0 0 12px 0;">اضغط على الصورة <b>ضغطة مطولة</b> لحفظها في الاستوديو.</p>' +
+        '<div style="background:#06090C; padding:8px; border-radius:8px; border:1px solid #232B33; margin-bottom:12px;"><img src="'+canvas.toDataURL("image/png")+'" style="max-width:100%; max-height:50vh; border-radius:6px; display:block; margin:0 auto;" /></div>' +
+        '<button onclick="this.parentElement.parentElement.remove()" style="padding:10px; font-weight:600; background:#FF6B35; border:none; color:#fff; border-radius:8px; cursor:pointer; width:100%;">إغلاق</button>' +
+        '</div>';
+      document.body.appendChild(modal);
+    });
+  }
+}, 500);
+
 </script>
 </body>
 </html>
+
