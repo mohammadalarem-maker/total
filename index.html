@@ -525,7 +525,12 @@ window.addEventListener('DOMContentLoaded', function() {
           map.setView([lat, lng], 19);
         }
       }, function(err) {
-        alert("خطأ في مستشعر الموقع: " + err.message);
+        var errMsg = err.message;
+        // تعديل مهم: التحقق إذا كان الخطأ بسبب حظر الـ WebView للصلاحية
+        if (err.code === err.PERMISSION_DENIED) {
+            errMsg = "نظام الأندرويد أو الـ (WebView) يمنع الوصول لإحداثيات الـ GPS! يجب تمرير كود الصلاحية من إعدادات تطبيقك (ملف MainActivity.kt) لكي يعمل.";
+        }
+        alert("خطأ في مستشعر الموقع ❌\nالسبب: " + errMsg);
         stopGpsTracking();
       }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     } else {
