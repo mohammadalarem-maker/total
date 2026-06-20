@@ -1,670 +1,847 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام رفع ومسح الإحداثيات المساحية (قوقل إيرث)</title>
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0" />
+<meta name="theme-color" content="#11161C" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>محطة المساحة الرقمية</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTIiIGZpbGw9IiMxMTE2MUMiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjI0IiByPSI5IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkIxNEUiIHN0cm9rZS13aWR0aD0iMyIvPjxsaW5lIHgxPSIzMiIgeTE9IjE1IiB4Mj0iMzIiIHkyPSI5IiBzdHJva2U9IiNGRkIxNEUiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjMyIiB5MT0iMzMiIHgyPSIyMCIgeTI9IjU1IiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjMyIiB5MT0iMzMiIHgyPSI0NCIgeTI9IjU1IiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjE2IiB5MT0iNTUiIHgyPSI0OCIgeTI9IjU1IiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTIiIGZpbGw9IiMxMTE2MUMiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjI0IiByPSI5IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkIxNEUiIHN0cm9rZS13aWR0aD0iMyIvPjxsaW5lIHgxPSIzMiIgeTE9IjE1IiB4Mj0iMzIiIHkyPSI5IiBzdHJva2U9IiNGRkIxNEUiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjMyIiB5MT0iMzMiIHgyPSIyMCIgeTI9IjU1IiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjMyIiB5MT0iMzMiIHgyPSI0NCIgeTI9IjU1IiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGxpbmUgeDE9IjE2IiB5MT0iNTUiIHgyPSI0OCIgeTI9IjU1IiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<style>
+  :root{
+    --bg:#11161C; --panel:#0B0F13; --panel-alt:#161D24; --line:#232B33;
+    --text:#E8E6E1; --text-dim:#8B95A1; --amber:#FFB14E; --amber-glow:rgba(255,177,78,0.35);
+    --orange:#FF6B35; --steel:#5B8AA6; --blue:#3DA9FC; --green:#5FD68A; --red:#E15554;
+    --font-ui:'Segoe UI', Tahoma, Arial, sans-serif; --font-mono:'Consolas','Courier New', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--font-ui);overflow:hidden;}
+  #map{position:fixed;inset:0;background:#0a0a0a;}
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 0; padding: 0;
-      background-color: #f4f6f9;
-      display: flex; flex-direction: column; height: 100vh;
-    }
-    header {
-      background-color: #1a2d42; color: white;
-      padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    .badge-box {
-      background-color: #e74c3c; padding: 6px 12px; border-radius: 8px; 
-      text-align: center; font-size: 13px; font-weight: bold; min-width: 60px;
-    }
-    .badge-box div { font-size: 16px; margin-top: 2px; }
-    
-    .main-layout {
-      display: flex; flex: 1; overflow: hidden;
-    }
-    #map {
-      flex: 1; height: 100%; min-height: 350px;
-    }
-    .sidebar {
-      width: 390px; background: white; border-left: 1px solid #ddd;
-      display: flex; flex-direction: column; overflow-y: auto; padding: 15px; box-sizing: border-box;
-    }
-    .card {
-      background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 8px;
-      padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .card h3 { margin-top: 0; color: #2c3e50; font-size: 15px; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 12px; }
-    
-    .input-group { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
-    .input-group input, .input-group select { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 13px; background: white; }
-    .input-group label { font-size: 12px; color: #555; font-weight: bold; min-width: 75px; }
-    
-    button {
-      background-color: #3498db; color: white; border: none; padding: 10px 12px;
-      border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
-      transition: background 0.2s;
-    }
-    button:hover { background-color: #2980b9; }
-    .btn-orange { background-color: #f39c12; }
-    .btn-orange:hover { background-color: #d35400; }
-    .btn-danger { background-color: #e74c3c; }
-    .btn-danger:hover { background-color: #c0392b; }
-    .btn-purple { background-color: #9b59b6; }
-    .btn-purple:hover { background-color: #8e44ad; }
-    .danger-armed { background-color: #d35400 !important; }
-    
-    .status-pill {
-      display: inline-block; padding: 3px 10px; border-radius: 12px;
-      background-color: #2ecc71; color: white; font-size: 11px; font-weight: bold;
-    }
-    .status-pill.open { background-color: #f1c40f; color: #333; }
-    .status-gps { background-color: #7f8c8d; }
-    .status-gps.active { background-color: #e74c3c; animation: pulse 1.5s infinite; }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-    
-    .report-text { font-size: 17px; margin: 6px 0; color: #2c3e50; }
-    .report-sub { font-size: 12px; color: #7f8c8d; margin: -5px 0 10px 0; }
-    
-    table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
-    th { background-color: #f8f9fa; color: #333; }
-    .elev-input { width: 55px; text-align: center; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
-    .del-btn { background: none; color: #e74c3c; border: none; cursor: pointer; font-size: 13px; padding: 0; }
+  /* Top bar */
+  #topbar{position:fixed;top:0;left:0;right:0;height:54px;z-index:700;
+    background:rgba(11,15,19,0.92);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;padding:0 12px;backdrop-filter:blur(4px);}
+  #topbar .title-block{display:flex;align-items:center;gap:8px;}
+  #topbar strong{font-size:14.5px;}
+  .badge-mini{font-family:var(--font-mono);font-size:11px;background:var(--panel-alt);border:1px solid var(--line);
+    color:var(--amber);border-radius:10px;padding:3px 9px;}
+  .icon-btn{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;
+    width:36px;height:36px;font-size:16px;cursor:pointer;}
+  .icon-btn:hover{border-color:var(--steel);}
 
-    .point-marker .pm-circle {
-      width: 24px; height: 24px; background: #e74c3c; color: white;
-      border-radius: 50%; text-align: center; line-height: 24px;
-      font-size: 11px; font-weight: bold; border: 2px solid #fff;
-      box-shadow: 0 0 6px rgba(0,0,0,0.5);
-    }
-    .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  /* Compass */
+  #compassWrap{position:fixed;top:64px;right:12px;z-index:650;width:42px;height:42px;border-radius:50%;
+    background:rgba(11,15,19,0.85);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+  #compassArrow{font-size:18px;transition:transform .15s linear;color:var(--amber);}
 
-    .modal {
-      display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(3px);
-    }
-    .modal-content {
-      background-color: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 450px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 12px;
-    }
-    .modal-body textarea { width: 100%; height: 160px; resize: none; direction: ltr; font-family: monospace; font-size: 11px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: #fafafa; }
-    .close-modal { cursor: pointer; font-size: 24px; color: #aaa; line-height: 1; }
+  /* GPS banner */
+  #gpsBanner{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:680;
+    background:rgba(11,15,19,0.96);border:1px solid var(--amber);color:var(--amber);
+    padding:8px 16px;border-radius:20px;font-size:12.5px;max-width:88%;text-align:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);}
+  #gpsBanner.danger{border-color:var(--red);color:var(--red);}
+  #gpsBanner.hidden{display:none;}
 
-    @media (max-width: 768px) {
-      .main-layout { flex-direction: column; overflow-y: auto; }
-      #map { height: 350px; width: 100%; flex: none; }
-      .sidebar { width: 100%; border-left: none; overflow-y: visible; padding: 12px; }
-    }
-  </style>
+  /* FAB stack */
+  #fabStack{position:fixed;left:14px;bottom:88px;z-index:600;display:flex;flex-direction:column;gap:10px;
+    transition:opacity .2s, transform .2s;}
+  #fabStack.hide-fabs{opacity:0;transform:translateY(16px);pointer-events:none;}
+  .fab{width:50px;height:50px;border-radius:50%;background:var(--panel-alt);color:var(--text);
+    font-size:19px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.5);cursor:pointer;}
+  .fab.primary{background:var(--orange);color:#1a0e08;border-color:var(--orange);}
+  .fab.active{background:var(--red);color:#fff;border-color:var(--red);animation:recPulse 1.2s infinite;}
+  .fab.hidden{display:none;}
+  @keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(225,85,84,.6);}70%{box-shadow:0 0 0 14px rgba(225,85,84,0);}100%{box-shadow:0 0 0 0 rgba(225,85,84,0);}}
+
+  /* Toast */
+  #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(10px);
+    background:#06090C;border:1px solid var(--line);color:var(--text);padding:8px 16px;
+    border-radius:20px;font-size:12.5px;opacity:0;transition:opacity .25s, transform .25s;
+    z-index:950;pointer-events:none;max-width:85%;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Bottom sheet */
+  #sheet{position:fixed;left:0;right:0;bottom:0;z-index:700;background:var(--panel);
+    border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.5);
+    display:flex;flex-direction:column;height:68vh;transition:height .25s ease;overflow:hidden;}
+  #sheet.collapsed{height:62px;}
+  #sheetHandle{flex:0 0 auto;padding:7px 14px 6px;cursor:pointer;}
+  .handle-bar{width:40px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 7px;}
+  .quick-stats{display:flex;justify-content:space-around;font-family:var(--font-mono);font-size:12px;color:var(--amber);}
+  #sheetTabs{flex:0 0 auto;display:flex;border-bottom:1px solid var(--line);overflow-x:auto;}
+  .tab-btn{flex:1;background:transparent;border:none;color:var(--text-dim);padding:9px 4px;
+    font-size:12px;white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-ui);}
+  .tab-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+  #sheetContent{flex:1;overflow-y:auto;padding:12px 14px 24px;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  h2.section-title{font-size:11.5px;color:var(--text-dim);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.6px;}
+  h2.section-title:first-child{margin-top:0;}
+
+  /* LCD readout */
+  .readout{background:#06090C;border:1px solid #1c2530;border-radius:8px;padding:12px;
+    font-family:var(--font-mono);box-shadow:inset 0 0 24px rgba(255,177,78,0.06);}
+  .readout-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;}
+  .readout-label{font-size:11px;color:#5b6675;letter-spacing:1px;}
+  .readout-value{font-size:19px;color:var(--amber);text-shadow:0 0 10px var(--amber-glow);font-weight:600;}
+  .readout-value.small{font-size:13px;color:#c9b27a;text-shadow:none;}
+  .readout-sub{font-size:10.5px;color:#7d8794;text-align:left;}
+  .status-pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--green);color:var(--green);}
+  .status-pill.open{border-color:var(--text-dim);color:var(--text-dim);}
+
+  .btn{border:1px solid var(--line);background:var(--panel-alt);color:var(--text);border-radius:8px;
+    padding:9px 12px;font-size:12.5px;cursor:pointer;font-family:var(--font-ui);}
+  .btn:hover{border-color:var(--steel);}
+  .btn.primary{background:var(--orange);border-color:var(--orange);color:#1a0e08;font-weight:600;}
+  .btn.danger-armed{background:var(--red);border-color:var(--red);color:#fff;}
+  .btn.block{width:100%;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-row .btn{flex:1;min-width:120px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+  .field label{font-size:11px;color:var(--text-dim);}
+  .field input[type=text], .field input[type=number]{
+    background:var(--panel-alt);border:1px solid var(--line);color:var(--text);
+    border-radius:6px;padding:8px 9px;font-family:var(--font-mono);font-size:13px;}
+  .hint{font-size:11.5px;color:var(--text-dim);line-height:1.7;}
+  .hidden{display:none !important;}
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px;}
+  table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11px;min-width:560px;}
+  thead th{position:sticky;top:0;background:var(--panel-alt);color:var(--text-dim);font-weight:500;
+    padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center;}
+  tbody td{padding:5px;text-align:center;border-bottom:1px solid #1a2027;white-space:nowrap;}
+  tbody tr:hover{background:rgba(91,138,166,0.06);}
+  .cell-input{width:62px;background:var(--panel-alt);border:1px solid var(--line);color:var(--amber);
+    border-radius:4px;padding:3px 4px;font-family:var(--font-mono);font-size:10.5px;text-align:center;}
+  .desc-input{width:74px;}
+  .del-btn{background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;
+    width:22px;height:22px;cursor:pointer;font-size:12px;line-height:1;}
+  .del-btn:hover{background:var(--red);color:#fff;}
+  .empty-row td{color:var(--text-dim);padding:16px 6px;font-family:var(--font-ui);font-size:12px;}
+
+  .accuracy-chip{font-family:var(--font-mono);padding:3px 10px;border-radius:10px;font-size:12.5px;display:inline-block;}
+  .accuracy-chip.good{color:var(--green);border:1px solid var(--green);}
+  .accuracy-chip.ok{color:var(--amber);border:1px solid var(--amber);}
+  .accuracy-chip.bad{color:var(--red);border:1px solid var(--red);}
+  .walk-stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);}
+  .walk-stat-row .lbl{font-size:12.5px;color:var(--text-dim);}
+  .walk-stat-row .val{font-family:var(--font-mono);font-size:14px;color:var(--text);}
+  .auto-capture-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;}
+  .auto-capture-row input[type=number]{width:56px;background:var(--panel-alt);border:1px solid var(--line);
+    color:var(--text);border-radius:5px;padding:5px;font-family:var(--font-mono);text-align:center;}
+
+  .export-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+  .pm-circle{width:26px;height:26px;border-radius:50%;background:var(--amber);color:#11161C;
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);
+    font-weight:700;font-size:12px;border:2px solid #1a0e08;box-shadow:0 0 8px rgba(255,177,78,0.7);}
+  .pm-circle.fresh{animation:pulse 1s ease-out 2;}
+  @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.35);}100%{transform:scale(1);}}
+
+  /* Info overlay */
+  #infoOverlay{position:fixed;inset:0;background:rgba(6,9,12,0.92);z-index:900;display:flex;
+    align-items:center;justify-content:center;padding:20px;}
+  #infoOverlay.hidden{display:none;}
+  .info-card{background:var(--panel-alt);border:1px solid var(--line);border-radius:12px;padding:18px;
+    max-width:420px;max-height:80vh;overflow-y:auto;}
+  .info-card h3{margin-top:0;color:var(--amber);font-size:15px;}
+  .info-card ul{padding-right:18px;line-height:1.85;font-size:12.5px;color:var(--text);margin:0 0 12px;}
+  .leaflet-control-layers, .leaflet-bar a{background:var(--panel-alt) !important;color:var(--text) !important;border-color:var(--line) !important;}
+
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:var(--panel);}
+  ::-webkit-scrollbar-thumb{background:#2a333d;border-radius:5px;}
+</style>
 </head>
 <body>
 
-<header>
-  <h2>نظام رفع ومسح الإحداثيات المساحية (قوقل إيرث)</h2>
-  <div class="badge-box">
-    النقاط
-    <div id="pointCountBadge">0</div>
+<div id="map"></div>
+
+<div id="topbar">
+  <div class="title-block">
+    <strong>📐 محطة المساحة</strong>
+    <span class="badge-mini" id="badgeCount">0 نقاط</span>
   </div>
-</header>
+  <button class="icon-btn" id="infoBtn" title="تعليمات">ℹ️</button>
+</div>
 
-<div class="main-layout">
-  <div id="map"></div>
-  
-  <div class="sidebar">
-    
-    <div class="card">
-      <h3>الذهاب إلى موقع</h3>
-      <div class="input-group">
-        <input type="number" id="manLat" placeholder="خط العرض Lat" step="any">
-        <input type="number" id="manLng" placeholder="خط الطول Lng" step="any">
-      </div>
-      <button id="goBtn" style="width:100%;">انتقال للموقع</button>
+<div id="compassWrap" class="hidden"><div id="compassArrow">⬆️</div></div>
+<div id="gpsBanner" class="hidden"></div>
+
+<div id="fabStack">
+  <button class="fab" id="fabLocate" title="مركز الخريطة على موقعي">🎯</button>
+  <button class="fab" id="fabAddHere" title="أضف نقطة بموقعي الحالي">📍</button>
+  <button class="fab" id="fabWalk" title="بدء/إيقاف المسح بالمشي">🚶</button>
+  <button class="fab primary hidden" id="fabCapture" title="أضف نقطة الآن">➕</button>
+</div>
+
+<div id="toast"></div>
+
+<div id="sheet" class="collapsed">
+  <div id="sheetHandle">
+    <div class="handle-bar"></div>
+    <div class="quick-stats">
+      <span id="qsArea">0.00 م²</span>
+      <span id="qsPerim">0.00 م</span>
+      <span id="qsCount">0 نقاط</span>
     </div>
+  </div>
+  <div id="sheetTabs">
+    <button class="tab-btn active" data-tab="table">📊 الجدول</button>
+    <button class="tab-btn" data-tab="walk">🚶 المسح بالمشي</button>
+    <button class="tab-btn" data-tab="export">📤 تصدير</button>
+    <button class="tab-btn" data-tab="project">💾 المشروع</button>
+  </div>
 
-    <div class="card">
-      <h3>إضافة نقطة يدويّاً</h3>
-      <div class="input-group">
-        <input type="number" id="addLat" placeholder="خط العرض Lat" step="any">
-        <input type="number" id="addLng" placeholder="خط الطول Lng" step="any">
-      </div>
-      <div class="input-group">
-        <input type="number" id="manElev" placeholder="الارتفاع Z (اختياري)" step="any" value="0">
-      </div>
-      <button id="manAddBtn" class="btn-orange" style="width:100%;">إضافة النقطة بالنظام</button>
-    </div>
+  <div id="sheetContent">
 
-    <div class="card" style="border-right: 4px solid #e74c3c;">
-      <h3>🚶‍♂️ المسح الميداني بالتتبع والمشي (GPS)</h3>
-      <div style="font-size: 12px; margin-bottom: 8px; color: #555; display: flex; justify-content: space-between;">
-        <span>دقة الإشارة: <strong id="gpsAccuracy">—</strong></span>
-        <span>حالة التتبع: <span id="gpsStatus" class="status-pill status-gps">موقف</span></span>
+    <div class="tab-panel active" id="panel-table">
+      <div class="readout">
+        <div class="readout-row"><span class="readout-label">المساحة</span><span class="readout-value" id="roArea">0.00 م²</span></div>
+        <div class="readout-row"><span class="readout-sub" id="roAreaSub">0.0000 هكتار · 0.000 دونم · 0.000 فدان</span></div>
+        <div class="readout-row" style="margin-top:6px;"><span class="readout-label">المحيط</span><span class="readout-value small" id="roPerimeter">0.00 م</span></div>
+        <div class="readout-row"><span class="readout-label">عدد النقاط</span><span class="readout-value small" id="roCount">0</span></div>
+        <div class="readout-row"><span class="readout-label">منطقة UTM</span><span class="readout-value small" id="roZone">—</span></div>
+        <div class="readout-row"><span class="readout-label">حالة المضلع</span><span class="status-pill open" id="roStatus">مفتوح</span></div>
       </div>
-      <div class="input-group">
-        <label>إسقاط كل:</label>
-        <select id="gpsDistanceFilter">
-          <option value="2">2 متر</option>
-          <option value="3" selected>3 متر (موصى به)</option>
-          <option value="5">5 متر</option>
-          <option value="10">10 متر</option>
-        </select>
-        <label style="min-width:auto; display:flex; align-items:center; gap:4px; font-size:11px;">
-          <input type="checkbox" id="gpsAutoCenter" checked style="flex:none; width:auto;"> لحق الشاشة
-        </label>
-      </div>
-      <button id="toggleGpsBtn" class="btn-danger" style="width:100%;">تشغيل الرفع التلقائي أثناء المشي 🏃‍♂️</button>
-    </div>
 
-    <div class="card" style="border-right: 4px solid #9b59b6;">
-      <h3>🎯 محاكاة جهاز التوتل استيشن (Total Station)</h3>
-      <div class="input-group">
-        <label>نقطة المحطة:</label>
-        <select id="tsStation"><option value="">-- اختر نقطة الوقوف بالدستور --</option></select>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn" id="undoBtn">↩ تراجع</button>
+        <button class="btn" id="clearBtn">🗑 مسح الكل</button>
       </div>
-      <div class="input-group">
-        <label>التوجيه الخلفي:</label>
-        <select id="tsBacksight">
-          <option value="direct">توجيه مباشر (انحراف من الشمال)</option>
-        </select>
-      </div>
-      <hr style="border:0; border-top:1px dashed #ddd; margin:8px 0;">
-      <div class="input-group">
-        <input type="number" id="tsAngle" placeholder="الزاوية الأفقية °" step="any">
-        <input type="number" id="tsDistance" placeholder="المسافة الأفقية (م)" step="any">
-        <input type="number" id="tsDeltaZ" placeholder="فرق الارتفاع ΔZ (م)" step="any" value="0">
-      </div>
-      <button id="tsShootBtn" class="btn-purple" style="width:100%;">رصد وحساب النقطة (Aim & Shoot) 🔭</button>
-    </div>
 
-    <div class="card">
-      <h3>التقرير المساحي</h3>
-      <div class="report-text">المساحة: <strong id="roArea">0.00 م²</strong></div>
-      <div class="report-sub" id="roAreaSub">0.0000 هكتار · 0.000 دونم</div>
-      <div class="report-text">المحيط: <strong id="roPerimeter">0.00 م</strong></div>
-      <p style="font-size: 12px; color: #2c3e50; margin: 5px 0;">زون الـ UTM: <strong id="roZone">—</strong> | مضلع: <span id="roStatus" class="status-pill open">مفتوح</span></p>
-      <div class="input-group" style="margin-bottom:0; margin-top:10px;">
-        <button id="undoBtn" class="btn-orange" style="flex:1;">تراجع ↩</button>
-        <button id="clearBtn" class="btn-danger" style="flex:1;">🗑️ مسح الكل</button>
+      <h2 class="section-title">جدول النقاط (طريقة التوتال ستيشن)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>الوصف</th><th>الشرقي E</th><th>الشمالي N</th><th>الارتفاع Z</th>
+            <th>مسافة للتالي</th><th>الاتجاه</th><th></th>
+          </tr></thead>
+          <tbody id="pointsBody"><tr class="empty-row"><td colspan="8">لا توجد نقاط بعد — استخدم الخريطة أو أزرار الـ GPS للبدء</td></tr></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="card">
-      <h3>تصدير البيانات المساحية</h3>
+    <div class="tab-panel" id="panel-walk">
+      <h2 class="section-title">المسح بالمشي (تتبع GPS مستمر)</h2>
+      <button class="btn primary block" id="walkToggleBtn">▶️ بدء المسح بالمشي</button>
+      <div style="margin-top:10px;">
+        <div class="walk-stat-row"><span class="lbl">الحالة</span><span class="val" id="walkStatus">متوقف</span></div>
+        <div class="walk-stat-row"><span class="lbl">المسافة المقطوعة</span><span class="val" id="walkDistance">0.0 م</span></div>
+        <div class="walk-stat-row"><span class="lbl">دقة GPS الحالية</span><span class="accuracy-chip ok" id="walkAccuracy">— م</span></div>
+      </div>
+      <div class="auto-capture-row">
+        <label><input type="checkbox" id="autoCaptureChk"/> تسجيل تلقائي كل</label>
+        <input type="number" id="autoCaptureInt" value="5" min="1" step="0.5"/>
+        <span>متر</span>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn primary" id="walkCaptureBtn">➕ أضف نقطة الآن</button>
+        <button class="btn" id="clearBreadcrumbBtn">🧹 مسح أثر المسار</button>
+      </div>
+      <p class="hint" style="margin-top:12px;">امشِ حول حدود الأرض، واضغط «أضف نقطة الآن» عند كل زاوية، أو فعّل التسجيل التلقائي لرسم خط حدودي متعرج تلقائياً. سيظهر تنبيه عند اقترابك من نقطة البداية لإغلاق المضلع.</p>
+    </div>
+
+    <div class="tab-panel" id="panel-export">
+      <h2 class="section-title">تصدير النتائج</h2>
       <div class="export-grid">
-        <button id="expDXF">تصدير AutoCAD DXF</button>
-        <button id="expKML">تصدير KML</button>
-        <button id="expTXT">تصدير PNEZD (TXT)</button>
-        <button id="expCSV">تصدير CSV</button>
+        <button class="btn" id="expKML">KML (Google Earth)</button>
+        <button class="btn" id="expDXF">DXF (AutoCAD)</button>
+        <button class="btn" id="expCSV">CSV (Excel)</button>
+        <button class="btn" id="expTXT">TXT (PNEZD)</button>
       </div>
-      <button id="expZIP" style="width:100%; margin-top:10px; background:#2ecc71;">تصدير الكل في ملف ملف ZIP 📦</button>
+      <button class="btn primary block" id="expZIP" style="margin-top:10px;">⬇ تصدير/مشاركة الكل (ZIP)</button>
+      <p class="hint" style="margin-top:10px;">على أندرويد، سيظهر مربع مشاركة لإرسال الملف مباشرة عبر واتساب أو البريد أو حفظه في درايف؛ وإن لم يتوفر، سيتم تنزيله مباشرة.</p>
     </div>
-    
-    <div class="card" style="flex:1; overflow-y:auto; margin-bottom:0;">
-      <h3>جدول النقاط والإحداثيات</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>E (X)</th>
-            <th>N (Y)</th>
-            <th>الارتفاع (Z)</th>
-            <th>المسافة</th>
-            <th>الانحراف</th>
-            <th>حذف</th>
-          </tr>
-        </thead>
-        <tbody id="pointsBody">
-          <tr class="empty-row"><td colspan="7">انقر على الخريطة أو استخدم أدوات الرفع لإنتاج النقاط...</td></tr>
-        </tbody>
-      </table>
+
+    <div class="tab-panel" id="panel-project">
+      <h2 class="section-title">المشروع</h2>
+      <div class="field">
+        <label>اسم المشروع</label>
+        <input type="text" id="projectName" placeholder="مثال: قطعة_الأرض_1" />
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="saveProjectBtn">💾 حفظ المشروع</button>
+        <button class="btn" id="openProjectBtn">📂 فتح مشروع</button>
+      </div>
+      <input type="file" id="openProjectInput" accept="application/json" class="hidden" />
+
+      <h2 class="section-title">إضافة نقطة بالإدخال اليدوي</h2>
+      <div class="grid2">
+        <div class="field"><label>خط العرض Lat</label><input type="number" id="manLat" step="any" /></div>
+        <div class="field"><label>خط الطول Lon</label><input type="number" id="manLng" step="any" /></div>
+        <div class="field"><label>الارتفاع Z</label><input type="number" id="manElev" step="any" value="0" /></div>
+        <div class="field"><label>الوصف</label><input type="text" id="manDesc" placeholder="اختياري" /></div>
+      </div>
+      <button class="btn primary block" id="manAddBtn">إضافة النقطة</button>
+
+      <h2 class="section-title">الانتقال إلى موقع على الخريطة</h2>
+      <div class="grid2">
+        <div class="field"><label>Lat</label><input type="number" id="goLat" step="any" /></div>
+        <div class="field"><label>Lon</label><input type="number" id="goLng" step="any" /></div>
+      </div>
+      <button class="btn block" id="goBtn">انتقال</button>
     </div>
 
   </div>
 </div>
 
-<div id="exportModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <span id="modalTitle">تصدير الملف</span>
-      <span class="close-modal" id="closeModalBtn">&times;</span>
-    </div>
-    <div class="modal-body">
-      <p style="font-size: 12px; color: #e67e22; margin: 0 0 8px 0; font-weight: bold;">تلميح: يمكنك نسخ البيانات مباشرة في حال قيود النظام المعماري للهاتف:</p>
-      <textarea id="modalTextArea" readonly></textarea>
-    </div>
-    <div style="display: flex; gap: 10px;">
-      <button id="copyTextBtn" style="flex: 1; background-color: #2ecc71;">نسخ النص 📋</button>
-      <button id="shareTextBtn" style="flex: 1; background-color: #9b59b6;">مشاركة مباشرة 🔗</button>
-    </div>
+<div id="infoOverlay" class="hidden">
+  <div class="info-card">
+    <h3>دليل الاستخدام السريع</h3>
+    <ul>
+      <li>🗺️ <b>النقر على الخريطة:</b> أضف نقطة بلمسة مباشرة على الصورة الجوية.</li>
+      <li>📍 <b>زر التحديد:</b> يضيف نقطة فورية عند موقعك الحالي عبر GPS.</li>
+      <li>🚶 <b>المسح بالمشي:</b> فعّله ثم امشِ حول حدود الأرض، واضغط ➕ عند كل زاوية، أو فعّل التسجيل التلقائي بالمسافة.</li>
+      <li>🎯 <b>توسيط الخريطة:</b> ينقل العرض لموقعك دون إضافة نقطة.</li>
+      <li>📊 المساحة والمحيط يُحسبان تلقائياً بعد 3 نقاط فأكثر، بدقة المتر (UTM).</li>
+      <li>💾 احفظ مشروعك كملف لاستكماله لاحقاً، وصدّر النتائج بصيغة DXF / KML / CSV / TXT.</li>
+      <li>⚠️ لعمل GPS والخريطة بشكل كامل، افتح هذا الملف مباشرة في متصفح Chrome على جوالك (لا تستخدم معاينة المحادثة).</li>
+    </ul>
+    <button class="btn primary block" id="infoCloseBtn">حسناً، فهمت</button>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-window.addEventListener('DOMContentLoaded', function() {
-  var googleEarth = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-    maxZoom: 22, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Map data ©Google Earth'
-  });
-  var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-  
-  var map = L.map('map', { center: [15.3694, 44.1910], zoom: 14, layers: [googleEarth] });
-  var baseMaps = { "خرائط قوقل إيرث (ساتلايت) 🌍": googleEarth, "خريطة الشوارع العادية (OSM) 🗺️": osm };
-  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
-  
-  var points = [];
+(function(){
+  "use strict";
+
+  // ============ State ============
+  var points = [];        // {id, lat, lng, elev, desc, marker}
   var nextId = 1;
   var utmZone = null;
-  var polyShape = null;
-  var watchId = null;
-  var lastTrackedLatLng = null;
+  var map, polyShape;
 
-  function toUTM(lat, lng) {
-    var zone = Math.floor((lng + 180) / 6) + 1;
-    var lon0 = (zone * 6) - 183;
-    var latRad = lat * Math.PI / 180;
-    var lonRad = (lng - lon0) * Math.PI / 180;
-    var a = 6378137.0; var f = 1.0 / 298.257223563; var b = a * (1.0 - f);
-    var e2 = (a*a - b*b) / (a*a); var ePrime2 = (a*a - b*b) / (b*b); var k0 = 0.9996;
-    var N = a / Math.sqrt(1.0 - e2 * Math.sin(latRad) * Math.sin(latRad));
-    var T = Math.tan(latRad) * Math.tan(latRad); var C = ePrime2 * Math.cos(latRad) * Math.cos(latRad); var A = Math.cos(latRad) * lonRad;
-    var M = a * ((1.0 - e2 / 4.0 - 3.0 * e2 * e2 / 64.0 - 5.0 * e2 * e2 / 256.0) * latRad
-              - (3.0 * e2 / 8.0 + 3.0 * e2 * e2 / 32.0 + 45.0 * e2 * e2 * e2 / 1024.0) * Math.sin(2.0 * latRad)
-              + (15.0 * e2 * e2 / 256.0 + 45.0 * e2 * e2 * e2 / 1024.0) * Math.sin(4.0 * latRad)
-              - (35.0 * e2 * e2 * e2 / 3072.0) * Math.sin(6.0 * latRad));
-    var x = k0 * N * (A + (1.0 - T + C) * A * A * A / 6.0 + (5.0 - 18.0 * T + T * T + 72.0 * C - 58.0 * ePrime2) * A * A * A * A * A / 120.0) + 500000.0;
-    var y = k0 * (M + N * Math.tan(latRad) * (A * A / 2.0 + (5.0 - T + 9.0 * C + 4.0 * C * C) * A * A * A * A / 24.0 + (61.0 - 58.0 * T + T * T + 600.0 * C - 330.0 * ePrime2) * A * A * A * A * A * A / 720.0));
-    if (lat < 0) y += 10000000.0;
-    if (!utmZone) utmZone = { zone: zone, isSouth: lat < 0 };
-    return { x: x, y: y };
-  }
+  var walking = false, watchId = null;
+  var walkDistance = 0, lastWalkPos = null;
+  var liveMarker = null, accuracyCircle = null;
+  var breadcrumb = null, breadcrumbCoords = [];
+  var autoCaptureEnabled = false, autoCaptureInterval = 5, lastCapturePos = null;
+  var currentGpsFix = null;
+  var closeBannerShown = false;
 
-  map.on('click', function(e) {
-    document.getElementById('manLat').value = e.latlng.lat.toFixed(7);
-    document.getElementById('manLng').value = e.latlng.lng.toFixed(7);
-    document.getElementById('addLat').value = e.latlng.lat.toFixed(7);
-    document.getElementById('addLng').value = e.latlng.lng.toFixed(7);
-    addPoint(e.latlng.lat, e.latlng.lng, 0);
+  // ============ Map setup ============
+  map = L.map('map', { center:[24.7136,46.6753], zoom:12, zoomControl:false });
+  L.control.zoom({ position:'topleft' }).addTo(map);
+
+  var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution:'Esri, Maxar, Earthstar Geographics', maxZoom:19
+  }).addTo(map);
+  var osmStreets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'&copy; OpenStreetMap contributors', maxZoom:19
   });
-  
-  function numberedIcon(id){
-    return L.divIcon({ className: 'point-marker', html: '<div class="pm-circle">' + id + '</div>', iconSize: [30,30], iconAnchor: [15,15] });
+  var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution:'&copy; OpenTopoMap contributors', maxZoom:17
+  });
+  L.control.layers({ 'صور الأقمار الصناعية':esriSat, 'خريطة الشوارع':osmStreets, 'طبوغرافية':topo }, {}, { position:'topleft' }).addTo(map);
+  L.control.scale({ imperial:false, position:'bottomleft' }).addTo(map);
+
+  map.on('click', function(e){ addPoint(e.latlng.lat, e.latlng.lng, 0); });
+
+  if (navigator.geolocation){
+    try {
+      navigator.geolocation.getCurrentPosition(function(pos){
+        map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+      }, function(){}, { timeout:4000 });
+    } catch(e){}
   }
-  
-  function addPoint(lat, lng, elev){
+
+  // ============ UTM helpers ============
+  function pickUtmZone(lat, lon){
+    var zone = Math.floor((lon + 180) / 6) + 1;
+    var isSouth = lat < 0;
+    var def = '+proj=utm +zone=' + zone + (isSouth ? ' +south' : '') + ' +datum=WGS84 +units=m +no_defs';
+    return { zone:zone, isSouth:isSouth, def:def };
+  }
+  function toUTM(lat, lng){
+    if (!utmZone) utmZone = pickUtmZone(lat, lng);
+    var r = proj4('WGS84', utmZone.def, [lng, lat]);
+    return { x:r[0], y:r[1] };
+  }
+
+  // ============ Geometry helpers ============
+  function dist(a,b){ var dx=b.x-a.x, dy=b.y-a.y; return Math.sqrt(dx*dx+dy*dy); }
+  function azimuthDeg(a,b){
+    var az = Math.atan2(b.x-a.x, b.y-a.y) * 180/Math.PI;
+    if (az < 0) az += 360;
+    return az;
+  }
+  function toDMS(deg){
+    var d = Math.floor(deg), minF = (deg-d)*60, m = Math.floor(minF), s = Math.round((minF-m)*60);
+    if (s===60){ s=0; m+=1; } if (m===60){ m=0; d+=1; }
+    function pad(n,len){ var str=String(Math.abs(n)); while(str.length<len) str='0'+str; return str; }
+    return pad(d,3) + '°' + pad(m,2) + "'" + pad(s,2) + '"';
+  }
+  function shoelaceArea(utmPts){
+    var area=0, n=utmPts.length;
+    for (var i=0;i<n;i++){ var j=(i+1)%n; area += utmPts[i].x*utmPts[j].y - utmPts[j].x*utmPts[i].y; }
+    return Math.abs(area/2);
+  }
+  function haversine(lat1,lon1,lat2,lon2){
+    var R=6371000, toRad=Math.PI/180;
+    var dLat=(lat2-lat1)*toRad, dLon=(lon2-lon1)*toRad;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*toRad)*Math.cos(lat2*toRad)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ============ Point management ============
+  function numberedIcon(id, fresh){
+    return L.divIcon({ className:'point-marker', html:'<div class="pm-circle'+(fresh?' fresh':'')+'">'+id+'</div>', iconSize:[26,26], iconAnchor:[13,13] });
+  }
+
+  function addPoint(lat, lng, elev, desc){
     var id = nextId++;
-    var marker = L.marker([lat,lng], { draggable: true, icon: numberedIcon(id) }).addTo(map);
-    var pt = { id: id, lat: lat, lng: lng, elev: elev || 0, marker: marker };
-    
-    marker.on('dragend', function(){
-      var ll = marker.getLatLng();
-      pt.lat = ll.lat; pt.lng = ll.lng;
-      recalcAll();
-    });
+    var marker = L.marker([lat,lng], { draggable:true, icon:numberedIcon(id,true) }).addTo(map);
+    var pt = { id:id, lat:lat, lng:lng, elev: elev||0, desc: (desc && desc.trim()) ? desc.trim() : ('P'+id), marker:marker };
+    marker.on('dragend', function(){ var ll=marker.getLatLng(); pt.lat=ll.lat; pt.lng=ll.lng; recalcAll(); });
     points.push(pt);
     recalcAll();
+    return pt;
   }
-  
+
   function deletePoint(id){
-    var idx = points.findIndex(function(p){ return p.id === id; });
-    if (idx === -1) return;
+    var idx = points.findIndex(function(p){ return p.id===id; });
+    if (idx===-1) return;
     map.removeLayer(points[idx].marker);
     points.splice(idx,1);
-    if (points.length === 0) utmZone = null;
+    if (points.length===0) utmZone = null;
     recalcAll();
   }
-  
+
   function undoLast(){
-    if (points.length === 0) return;
+    if (points.length===0) return;
     var last = points.pop();
     map.removeLayer(last.marker);
-    if (points.length === 0) utmZone = null;
+    if (points.length===0) utmZone = null;
     recalcAll();
   }
-  
+
   function clearAll(){
     points.forEach(function(p){ map.removeLayer(p.marker); });
     points = []; utmZone = null;
     recalcAll();
   }
-  
-  function dist(a,b){ var dx=b.x-a.x, dy=b.y-a.y; return Math.sqrt(dx*dx+dy*dy); }
 
-  function azimuthDeg(a,b){
-    var dx = b.x - a.x, dy = b.y - a.y;
-    var az = Math.atan2(dx,dy) * 180 / Math.PI;
-    if (az < 0) az += 360;
-    return az;
-  }
-  
-  function toDMS(deg){
-    var d = Math.floor(deg); var minF = (deg-d)*60; var m = Math.floor(minF); var s = Math.round((minF-m)*60);
-    if (s === 60){ s=0; m+=1; } if (m === 60){ m=0; d+=1; }
-    function pad(n,len){ var s=String(Math.abs(n)); while(s.length<len) s='0'+s; return s; }
-    return pad(d,3) + '°' + pad(m,2) + "'" + pad(s,2) + '"';
-  }
-  
-  function shoelaceArea(utmPts){
-    var area = 0, n = utmPts.length;
-    for (var i=0; i<n; i++){
-      var j = (i+1) % n; area += utmPts[i].x * utmPts[j].y - utmPts[j].x * utmPts[i].y;
-    }
-    return Math.abs(area/2);
-  }
-  
+  // ============ Recalc + render ============
   function recalcAll(){
-    try {
-      var utm = points.map(function(p){ return toUTM(p.lat,p.lng); });
-      var closed = points.length >= 3;
-      var segDist = [], segAz = [];
-      for (var i=0; i<points.length; i++){
-        var hasNext = (i < points.length-1) || closed;
-        if (!hasNext){ segDist.push(null); segAz.push(null); continue; }
-        var j = (i+1) % points.length;
-        segDist.push(dist(utm[i], utm[j]));
-        segAz.push(azimuthDeg(utm[i], utm[j]));
-      }
-      var perimeter = segDist.reduce(function(s,v){ return s + (v||0); }, 0);
-      var area = closed ? shoelaceArea(utm) : 0;
-      
-      renderReadout(area, perimeter, closed);
-      renderTable(utm, segDist, segAz);
-      renderMapShape(closed);
-      document.getElementById('pointCountBadge').textContent = points.length;
-      updateTsDropdowns();
-    } catch(err) { console.error(err); }
+    var utm = points.map(function(p){ return toUTM(p.lat,p.lng); });
+    var closed = points.length >= 3;
+    var segDist=[], segAz=[];
+    for (var i=0;i<points.length;i++){
+      var hasNext = (i < points.length-1) || closed;
+      if (!hasNext){ segDist.push(null); segAz.push(null); continue; }
+      var j=(i+1)%points.length;
+      segDist.push(dist(utm[i],utm[j]));
+      segAz.push(azimuthDeg(utm[i],utm[j]));
+    }
+    var perimeter = segDist.reduce(function(s,v){ return s+(v||0); },0);
+    var area = closed ? shoelaceArea(utm) : 0;
+
+    renderReadout(area, perimeter, closed);
+    renderTable(utm, segDist, segAz);
+    renderMapShape(closed);
   }
-  
+
   function renderReadout(area, perimeter, closed){
-    document.getElementById('roArea').textContent = area.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م²';
-    document.getElementById('roAreaSub').textContent = (area/10000).toLocaleString('en-US',{minimumFractionDigits:4,maximumFractionDigits:4}) + ' هكتار · ' + (area/1000).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' دونم';
-    document.getElementById('roPerimeter').textContent = perimeter.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م';
-    document.getElementById('roZone').textContent = utmZone ? ('UTM ' + utmZone.zone + (utmZone.isSouth?'S':'N')) : '—';
-    var st = document.getElementById('roStatus'); st.textContent = closed ? 'مغلق' : 'مفتوح'; st.className = closed ? 'status-pill' : 'status-pill open';
+    var areaTxt = area.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م²';
+    var perimTxt = perimeter.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' م';
+    document.getElementById('roArea').textContent = areaTxt;
+    document.getElementById('roAreaSub').textContent =
+      (area/10000).toFixed(4) + ' هكتار · ' + (area/1000).toFixed(3) + ' دونم · ' + (area/4046.8564224).toFixed(3) + ' فدان';
+    document.getElementById('roPerimeter').textContent = perimTxt;
+    document.getElementById('roCount').textContent = points.length;
+    document.getElementById('roZone').textContent = utmZone ? ('UTM '+utmZone.zone+(utmZone.isSouth?'S':'N')) : '—';
+    var st = document.getElementById('roStatus');
+    st.textContent = closed ? 'مغلق' : 'مفتوح';
+    st.className = closed ? 'status-pill' : 'status-pill open';
+
+    document.getElementById('qsArea').textContent = areaTxt;
+    document.getElementById('qsPerim').textContent = perimTxt;
+    document.getElementById('qsCount').textContent = points.length + ' نقاط';
+    document.getElementById('badgeCount').textContent = points.length + ' نقاط';
   }
-  
+
   function renderTable(utm, segDist, segAz){
     var body = document.getElementById('pointsBody');
-    if (points.length === 0){
-      body.innerHTML = '<tr class="empty-row"><td colspan="7">انقر على الخريطة أو استخدم أدوات الرفع لإنتاج النقاط...</td></tr>'; return;
+    if (points.length===0){
+      body.innerHTML = '<tr class="empty-row"><td colspan="8">لا توجد نقاط بعد — استخدم الخريطة أو أزرار الـ GPS للبدء</td></tr>';
+      return;
     }
-    body.innerHTML = points.map(function(p, i){
-      var u = utm[i]; var d = segDist[i], az = segAz[i];
-      return '<tr>' + '<td>P' + p.id + '</td>' + '<td>' + u.x.toFixed(3) + '</td>' + '<td>' + u.y.toFixed(3) + '</td>' +
-        '<td><input class="elev-input" type="number" step="any" value="' + p.elev + '" data-id="' + p.id + '" /></td>' +
-        '<td>' + (d===null ? '—' : d.toFixed(2)) + '</td>' + '<td>' + (az===null ? '—' : toDMS(az)) + '</td>' +
-        '<td><button class="del-btn" data-id="' + p.id + '">❌</button></td>' + '</tr>';
+    var rows = points.map(function(p,i){
+      var u = utm[i], d = segDist[i], az = segAz[i];
+      return '<tr>' +
+        '<td>P'+p.id+'</td>' +
+        '<td><input class="cell-input desc-input" type="text" value="'+escapeHtml(p.desc)+'" data-id="'+p.id+'" data-field="desc" /></td>' +
+        '<td>'+u.x.toFixed(3)+'</td>' +
+        '<td>'+u.y.toFixed(3)+'</td>' +
+        '<td><input class="cell-input" type="number" step="any" value="'+p.elev+'" data-id="'+p.id+'" data-field="elev" /></td>' +
+        '<td>'+(d===null?'—':d.toFixed(2))+'</td>' +
+        '<td>'+(az===null?'—':toDMS(az))+'</td>' +
+        '<td><button class="del-btn" data-id="'+p.id+'">✕</button></td>' +
+        '</tr>';
     }).join('');
-    
-    body.querySelectorAll('.del-btn').forEach(function(btn){ btn.addEventListener('click', function(){ deletePoint(parseInt(btn.dataset.id,10)); }); });
-    body.querySelectorAll('.elev-input').forEach(function(inp){
+    body.innerHTML = rows;
+    body.querySelectorAll('.del-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ deletePoint(parseInt(btn.dataset.id,10)); });
+    });
+    body.querySelectorAll('input[data-field]').forEach(function(inp){
       inp.addEventListener('change', function(){
-        var p = points.find(function(pt){ return pt.id === parseInt(inp.dataset.id,10); }); if (p) p.elev = parseFloat(inp.value) || 0;
+        var p = points.find(function(pt){ return pt.id===parseInt(inp.dataset.id,10); });
+        if (!p) return;
+        if (inp.dataset.field==='elev') p.elev = parseFloat(inp.value)||0;
+        else p.desc = inp.value.trim() || ('P'+p.id);
       });
     });
   }
-  
+
   function renderMapShape(closed){
-    if (polyShape){ map.removeLayer(polyShape); polyShape = null; }
+    if (polyShape){ map.removeLayer(polyShape); polyShape=null; }
     if (points.length < 2) return;
     var latlngs = points.map(function(p){ return [p.lat,p.lng]; });
-    polyShape = closed ? L.polygon(latlngs, { color: '#00E676', weight: 3, fillColor: '#00E676', fillOpacity: 0.25 }).addTo(map) : L.polyline(latlngs, { color: '#00E676', weight: 3 }).addTo(map);
-  }
-  function updateTsDropdowns() {
-    var stnSelect = document.getElementById('tsStation');
-    var bsSelect = document.getElementById('tsBacksight');
-    var savedStn = stnSelect.value;
-    var savedBs = bsSelect.value;
-    
-    stnSelect.innerHTML = '<option value="">-- اختر نقطة الوقوف بالدستور --</option>';
-    bsSelect.innerHTML = '<option value="direct">توجيه مباشر (انحراف من الشمال)</option>';
-    
-    points.forEach(function(p) {
-      var opt = '<option value="' + p.id + '">النقطة P' + p.id + '</option>';
-      stnSelect.innerHTML += opt;
-      bsSelect.innerHTML += opt;
-    });
-    
-    stnSelect.value = savedStn;
-    bsSelect.value = savedBs;
+    if (closed) polyShape = L.polygon(latlngs, { color:'#FF6B35', weight:2, fillColor:'#FFB14E', fillOpacity:0.18 }).addTo(map);
+    else polyShape = L.polyline(latlngs, { color:'#FF6B35', weight:2 }).addTo(map);
   }
 
-  document.getElementById('tsShootBtn').addEventListener('click', function() {
-    var stnId = parseInt(document.getElementById('tsStation').value, 10);
-    var bsValue = document.getElementById('tsBacksight').value;
-    var horizAngle = parseFloat(document.getElementById('tsAngle').value);
-    var horizDist = parseFloat(document.getElementById('tsDistance').value);
-    var deltaZ = parseFloat(document.getElementById('tsDeltaZ').value) || 0;
-    
-    if (isNaN(stnId)) { alert('يرجى اختيار نقطة المحطة (مكان الوقوف بالجهاز) أولاً.'); return; }
-    if (isNaN(horizAngle) || isNaN(horizDist)) { alert('يرجى إدخال الزاوية الأفقية والمسافة المترية المرصودة.'); return; }
-    
-    var stnPoint = points.find(function(p) { return p.id === stnId; });
-    if (!stnPoint) return;
-    
-    var finalAzimuth = 0;
-    if (bsValue === 'direct') {
-      finalAzimuth = horizAngle;
-    } else {
-      var bsId = parseInt(bsValue, 10);
-      if (stnId === bsId) { alert('لا يمكن اختيار نفس نقطة المحطة للتوجيه الخلفي!'); return; }
-      var bsPoint = points.find(function(p) { return p.id === bsId; });
-      if (!bsPoint) return;
-      
-      var utmStn = toUTM(stnPoint.lat, stnPoint.lng);
-      var utmBs = toUTM(bsPoint.lat, bsPoint.lng);
-      var baseAzimuth = azimuthDeg(utmStn, utmBs);
-      finalAzimuth = (baseAzimuth + horizAngle) % 360;
+  // ============ Toast ============
+  function showToast(msg, ms){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, ms||2200);
+  }
+
+  // ============ One-off GPS actions ============
+  function oneOffLocate(centerOnly){
+    if (!navigator.geolocation){ showToast('GPS غير مدعوم في هذا المتصفح'); return; }
+    showToast('جاري تحديد الموقع...');
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var lat=pos.coords.latitude, lng=pos.coords.longitude, acc=pos.coords.accuracy;
+      map.setView([lat,lng], Math.max(map.getZoom(),16));
+      if (!centerOnly){
+        addPoint(lat,lng,0);
+        showToast('تمت إضافة نقطة (دقة ' + acc.toFixed(0) + ' م)');
+      }
+    }, function(){
+      showToast('تعذر تحديد الموقع — تحقق من تفعيل GPS والإذن للمتصفح');
+    }, { enableHighAccuracy:true, timeout:12000, maximumAge:0 });
+  }
+
+  // ============ Walking survey mode ============
+  function setAccuracyDisplay(acc){
+    var el = document.getElementById('walkAccuracy');
+    el.textContent = acc.toFixed(1) + ' م';
+    el.className = 'accuracy-chip ' + (acc<=5 ? 'good' : (acc<=15 ? 'ok' : 'bad'));
+  }
+
+  function manageWalkBanner(acc, dStart){
+    var banner = document.getElementById('gpsBanner');
+    if (dStart!==null && dStart<=4){
+      banner.textContent = '🔵 أنت قريب من نقطة البداية — اضغط «إيقاف المسح» لإغلاق المضلع';
+      banner.classList.remove('hidden'); banner.classList.remove('danger');
+      return;
     }
-    
-    var r_earth = 6378137.0;
-    var alphaRad = finalAzimuth * Math.PI / 180;
-    
-    var deltaLat = (horizDist * Math.cos(alphaRad)) / r_earth * (180 / Math.PI);
-    var deltaLng = (horizDist * Math.sin(alphaRad)) / (r_earth * Math.cos(stnPoint.lat * Math.PI / 180)) * (180 / Math.PI);
-    
-    var newLat = stnPoint.lat + deltaLat;
-    var newLng = stnPoint.lng + deltaLng;
-    var newElev = stnPoint.elev + deltaZ;
-    
-    addPoint(newLat, newLng, newElev);
-    map.panTo([newLat, newLng]);
-    
-    document.getElementById('tsAngle').value = '';
-    document.getElementById('tsDistance').value = '';
-    document.getElementById('tsDeltaZ').value = '0';
-  });
-
-  document.getElementById('toggleGpsBtn').addEventListener('click', function() {
-    var btn = document.getElementById('toggleGpsBtn');
-    var statusPill = document.getElementById('gpsStatus');
-    
-    if (watchId === null) {
-      if (!navigator.geolocation) { alert('الـ GPS الميداني غير مدعوم على هذا الجهاز.'); return; }
-      btn.textContent = "⚙️ جاري التقاط الأقمار الصناعية...";
-      
-      watchId = navigator.geolocation.watchPosition(function(pos) {
-        var lat = pos.coords.latitude;
-        var lng = pos.coords.longitude;
-        var accuracy = pos.coords.accuracy;
-        var elev = pos.coords.altitude || 0;
-        
-        document.getElementById('gpsAccuracy').textContent = accuracy.toFixed(1) + " م";
-        btn.textContent = "🛑 إيقاف الرفع التلقائي (التتبع شغال)";
-        btn.style.backgroundColor = "#c0392b";
-        statusPill.textContent = "نشط";
-        statusPill.classList.add('active');
-        
-        if (accuracy > 15) return; 
-        
-        var currentLatLng = L.latLng(lat, lng);
-        var filterDist = parseFloat(document.getElementById('gpsDistanceFilter').value);
-        
-        if (lastTrackedLatLng === null) {
-          addPoint(lat, lng, elev);
-          lastTrackedLatLng = currentLatLng;
-        } else {
-          var d = lastTrackedLatLng.distanceTo(currentLatLng);
-          if (d >= filterDist) {
-            addPoint(lat, lng, elev);
-            lastTrackedLatLng = currentLatLng;
-          }
-        }
-        
-        if (document.getElementById('gpsAutoCenter').checked) {
-          map.setView([lat, lng], 19);
-        }
-      }, function(err) {
-        var errMsg = err.message;
-        // تعديل مهم: التحقق إذا كان الخطأ بسبب حظر الـ WebView للصلاحية
-        if (err.code === err.PERMISSION_DENIED) {
-            errMsg = "نظام الأندرويد أو الـ (WebView) يمنع الوصول لإحداثيات الـ GPS! يجب تمرير كود الصلاحية من إعدادات تطبيقك (ملف MainActivity.kt) لكي يعمل.";
-        }
-        alert("خطأ في مستشعر الموقع ❌\nالسبب: " + errMsg);
-        stopGpsTracking();
-      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-    } else {
-      stopGpsTracking();
+    if (acc>20){
+      banner.textContent = '⚠️ دقة GPS ضعيفة (' + acc.toFixed(0) + ' م) — انتقل لمكان مكشوف إن أمكن';
+      banner.classList.remove('hidden'); banner.classList.add('danger');
+      return;
     }
-  });
-
-  function stopGpsTracking() {
-    if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-    lastTrackedLatLng = null;
-    var btn = document.getElementById('toggleGpsBtn');
-    btn.textContent = "تشغيل الرفع التلقائي أثناء المشي 🏃‍♂️";
-    btn.style.backgroundColor = "#e74c3c";
-    var statusPill = document.getElementById('gpsStatus');
-    statusPill.textContent = "موقف";
-    statusPill.classList.remove('active');
-    document.getElementById('gpsAccuracy').textContent = "—";
+    banner.classList.add('hidden');
   }
-  
+
+  function updateWalkUI(){
+    var btn = document.getElementById('walkToggleBtn');
+    btn.textContent = walking ? '⏹ إيقاف المسح' : '▶️ بدء المسح بالمشي';
+    btn.classList.toggle('primary', !walking);
+    btn.classList.toggle('danger-armed', walking);
+    document.getElementById('walkDistance').textContent = walkDistance.toFixed(1) + ' م';
+    document.getElementById('walkStatus').textContent = walking ? 'جاري المسح...' : 'متوقف';
+  }
+
+  function onWalkUpdate(pos){
+    var lat=pos.coords.latitude, lng=pos.coords.longitude, acc=pos.coords.accuracy;
+    currentGpsFix = { lat:lat, lng:lng, acc:acc };
+    setAccuracyDisplay(acc);
+
+    if (!liveMarker) liveMarker = L.circleMarker([lat,lng], { radius:8, color:'#3DA9FC', fillColor:'#3DA9FC', fillOpacity:0.9, weight:2 }).addTo(map);
+    else liveMarker.setLatLng([lat,lng]);
+    if (!accuracyCircle) accuracyCircle = L.circle([lat,lng], { radius:acc, color:'#3DA9FC', weight:1, fillOpacity:0.08 }).addTo(map);
+    else { accuracyCircle.setLatLng([lat,lng]); accuracyCircle.setRadius(acc); }
+
+    if (lastWalkPos) walkDistance += haversine(lastWalkPos.lat,lastWalkPos.lng, lat,lng);
+    lastWalkPos = { lat:lat, lng:lng };
+    breadcrumbCoords.push([lat,lng]);
+    if (!breadcrumb) breadcrumb = L.polyline(breadcrumbCoords, { color:'#3DA9FC', weight:3, dashArray:'4,6', opacity:0.8 }).addTo(map);
+    else breadcrumb.setLatLngs(breadcrumbCoords);
+
+    if (autoCaptureEnabled){
+      if (!lastCapturePos){ addPoint(lat,lng,0); lastCapturePos={lat:lat,lng:lng}; }
+      else {
+        var dCap = haversine(lastCapturePos.lat,lastCapturePos.lng, lat,lng);
+        if (dCap >= autoCaptureInterval){ addPoint(lat,lng,0); lastCapturePos={lat:lat,lng:lng}; }
+      }
+    }
+
+    var dStart = null;
+    if (points.length>=3){ dStart = haversine(lat,lng, points[0].lat, points[0].lng); }
+    manageWalkBanner(acc, dStart);
+    updateWalkUI();
+  }
+
+  function onWalkError(){
+    showToast('تعذر الحصول على الموقع — تحقق من تفعيل GPS والأذونات');
+  }
+
+  function startWalking(){
+    if (!navigator.geolocation){ showToast('GPS غير مدعوم في هذا المتصفح'); return; }
+    walking = true; walkDistance = 0; lastWalkPos = null; breadcrumbCoords = []; lastCapturePos = null; closeBannerShown = false;
+    document.getElementById('fabWalk').classList.add('active');
+    document.getElementById('fabCapture').classList.remove('hidden');
+    watchId = navigator.geolocation.watchPosition(onWalkUpdate, onWalkError, { enableHighAccuracy:true, maximumAge:1000, timeout:15000 });
+    updateWalkUI();
+  }
+
+  function stopWalking(){
+    walking = false;
+    if (watchId!==null) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    document.getElementById('fabWalk').classList.remove('active');
+    document.getElementById('fabCapture').classList.add('hidden');
+    document.getElementById('gpsBanner').classList.add('hidden');
+    updateWalkUI();
+  }
+
+  // ============ Export builders ============
   function buildKML(){
     var placemarks = points.map(function(p){
-      return '<Placemark><name>P' + p.id + '</name><description>Z=' + p.elev + '</description><Point><coordinates>' + p.lng + ',' + p.lat + ',' + p.elev + '</coordinates></Point></Placemark>';
+      return '<Placemark><name>'+escapeHtml(p.desc)+'</name><description>P'+p.id+' Z='+p.elev+'</description>' +
+        '<Point><coordinates>'+p.lng+','+p.lat+','+p.elev+'</coordinates></Point></Placemark>';
     }).join('\n');
     var polygonKml = '';
-    if (points.length >= 3){
-      var coords = points.map(function(p){ return p.lng + ',' + p.lat + ',' + p.elev; }).join(' ');
-      coords += ' ' + points[0].lng + ',' + points[0].lat + ',' + points[0].elev;
-      polygonKml = '<Placemark><name>حدود المساحة</name><Style><LineStyle><color>ff3566ff</color><width>2</width></LineStyle><PolyStyle><color>664eb1ff</color></PolyStyle></Style><Polygon><outerBoundaryIs><LinearRing><coordinates>' + coords + '</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>';
+    if (points.length>=3){
+      var coords = points.map(function(p){ return p.lng+','+p.lat+','+p.elev; }).join(' ');
+      coords += ' ' + points[0].lng+','+points[0].lat+','+points[0].elev;
+      polygonKml = '<Placemark><name>حدود المساحة</name>' +
+        '<Style><LineStyle><color>ff3566ff</color><width>2</width></LineStyle><PolyStyle><color>664eb1ff</color></PolyStyle></Style>' +
+        '<Polygon><outerBoundaryIs><LinearRing><coordinates>'+coords+'</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>';
     }
-    return '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>مسح الموقع</name>\n' + placemarks + '\n' + polygonKml + '\n</Document></kml>';
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>مسح الموقع</name>\n' +
+      placemarks + '\n' + polygonKml + '\n</Document></kml>';
   }
-  
+
   function buildDXF(){
     var entities = '';
     points.forEach(function(p){
       var u = toUTM(p.lat,p.lng);
-      entities += '0\nPOINT\n8\nPOINTS\n10\n' + u.x.toFixed(3) + '\n20\n' + u.y.toFixed(3) + '\n30\n' + p.elev.toFixed(3) + '\n';
-      entities += '0\nTEXT\n8\nLABELS\n10\n' + (u.x+0.5).toFixed(3) + '\n20\n' + (u.y+0.5).toFixed(3) + '\n30\n0\n40\n0.8\n1\nP' + p.id + '\n';
+      entities += '0\nPOINT\n8\nPOINTS\n10\n'+u.x.toFixed(3)+'\n20\n'+u.y.toFixed(3)+'\n30\n'+p.elev.toFixed(3)+'\n';
+      entities += '0\nTEXT\n8\nLABELS\n10\n'+(u.x+0.6).toFixed(3)+'\n20\n'+(u.y+0.6).toFixed(3)+'\n30\n0\n40\n1.0\n1\n'+(p.desc||('P'+p.id))+'\n';
     });
-    if (points.length >= 2){
-      var closedFlag = points.length >= 3 ? 1 : 0;
-      entities += '0\nPOLYLINE\n8\nBOUNDARY\n66\n1\n70\n' + closedFlag + '\n';
+    if (points.length>=2){
+      var closedFlag = points.length>=3 ? 1 : 0;
+      entities += '0\nPOLYLINE\n8\nBOUNDARY\n66\n1\n70\n'+closedFlag+'\n';
       points.forEach(function(p){
-        var u = toUTM(p.lat,p.lng); entities += '0\nVERTEX\n8\nBOUNDARY\n10\n' + u.x.toFixed(3) + '\n20\n' + u.y.toFixed(3) + '\n30\n' + p.elev.toFixed(3) + '\n';
+        var u = toUTM(p.lat,p.lng);
+        entities += '0\nVERTEX\n8\nBOUNDARY\n10\n'+u.x.toFixed(3)+'\n20\n'+u.y.toFixed(3)+'\n30\n'+p.elev.toFixed(3)+'\n';
       });
       entities += '0\nSEQEND\n';
     }
-    return '0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n' + entities + '0\nENDSEC\n0\nEOF\n';
+    return '0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n' +
+      entities + '0\nENDSEC\n0\nEOF\n';
   }
-  
+
   function buildCSV(){
-    var rows = ['Point,Lat,Lon,Easting,Northing,Elevation'];
-    points.forEach(function(p){ var u = toUTM(p.lat,p.lng); rows.push(['P'+p.id, p.lat.toFixed(7), p.lng.toFixed(7), u.x.toFixed(3), u.y.toFixed(3), p.elev.toFixed(3)].join(',')); });
+    var rows = ['Point,Description,Lat,Lon,Easting,Northing,Elevation'];
+    points.forEach(function(p){
+      var u = toUTM(p.lat,p.lng);
+      rows.push(['P'+p.id, '"'+(p.desc||'').replace(/"/g,'""')+'"', p.lat.toFixed(7), p.lng.toFixed(7), u.x.toFixed(3), u.y.toFixed(3), p.elev.toFixed(3)].join(','));
+    });
     return rows.join('\n');
   }
 
   function buildTXT(){
     var rows = [];
-    points.forEach(function(p){ var u = toUTM(p.lat,p.lng); rows.push([p.id, u.y.toFixed(3), u.x.toFixed(3), p.elev.toFixed(3), 'P'+p.id].join(',')); });
+    points.forEach(function(p){
+      var u = toUTM(p.lat,p.lng);
+      rows.push([p.id, u.y.toFixed(3), u.x.toFixed(3), p.elev.toFixed(3), (p.desc||('P'+p.id))].join(','));
+    });
     return rows.join('\n');
   }
 
-  function downloadFile(content, filename, mime){
+  // ============ Download / Share ============
+  function triggerDownload(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+  }
+  function shareOrDownload(blob, filename){
     try {
-      var blob = new Blob([content], { type: mime }); var url = URL.createObjectURL(blob);
-      var a = document.createElement('a'); a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    } catch (e) { console.log("Blocked by WebView"); }
+      if (navigator.canShare){
+        var file = new File([blob], filename, { type:blob.type });
+        if (navigator.canShare({ files:[file] })){
+          navigator.share({ files:[file], title:filename }).catch(function(){ triggerDownload(blob,filename); });
+          return;
+        }
+      }
+    } catch(e){}
+    triggerDownload(blob, filename);
   }
-  
-  function handleExport(content, filename, mime) {
-    downloadFile(content, filename, mime);
-    document.getElementById('modalTitle').textContent = "تصدير ملف: " + filename;
-    document.getElementById('modalTextArea').value = content;
-    document.getElementById('exportModal').style.display = 'flex';
+  function projectFileBase(){
+    var n = (document.getElementById('projectName').value||'').trim();
+    if (!n) return 'survey';
+    n = n.replace(/\s+/g,'_').replace(/[^\w\u0600-\u06FF\-]/g,'');
+    return n || 'survey';
+  }
+  function guardEmpty(){
+    if (points.length===0){ showToast('أضف نقطة واحدة على الأقل أولاً'); return true; }
+    return false;
   }
 
-  function guardEmpty(){ if (points.length === 0){ alert('يرجى إسقاط أو رصد نقطة واحدة على الأقل قبل التصدير.'); return true; } return false; }
+  // ============ Project save/load ============
+  function saveProject(){
+    if (guardEmpty()) return;
+    var data = {
+      name: projectFileBase(), createdAt: new Date().toISOString(), nextId: nextId,
+      points: points.map(function(p){ return { id:p.id, lat:p.lat, lng:p.lng, elev:p.elev, desc:p.desc }; })
+    };
+    shareOrDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), projectFileBase()+'.json');
+  }
+  function loadProjectFile(file){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        var data = JSON.parse(e.target.result);
+        clearAll();
+        (data.points||[]).forEach(function(p){ addPoint(p.lat, p.lng, p.elev||0, p.desc); });
+        if (data.name) document.getElementById('projectName').value = data.name;
+        showToast('تم تحميل المشروع: ' + (data.points||[]).length + ' نقطة');
+      } catch(err){ showToast('ملف غير صالح'); }
+    };
+    reader.readAsText(file);
+  }
 
-  document.getElementById('manAddBtn').addEventListener('click', function(){
-    var lat = parseFloat(document.getElementById('addLat').value); var lng = parseFloat(document.getElementById('addLng').value);
-    var elev = parseFloat(document.getElementById('manElev').value) || 0;
-    if (isNaN(lat) || isNaN(lng) || lat<-90 || lat>90 || lng<-180 || lng>180){ alert('أدخل إحداثيات صحيحة للرفع.'); return; }
-    addPoint(lat,lng,elev); map.panTo([lat,lng]);
+  // ============ Compass (best-effort) ============
+  var compassShown = false;
+  function handleOrientation(e){
+    var heading = null;
+    if (typeof e.webkitCompassHeading === 'number') heading = e.webkitCompassHeading;
+    else if (typeof e.alpha === 'number') heading = 360 - e.alpha;
+    if (heading===null || isNaN(heading)) return;
+    if (!compassShown){ document.getElementById('compassWrap').classList.remove('hidden'); compassShown = true; }
+    document.getElementById('compassArrow').style.transform = 'rotate(' + heading + 'deg)';
+  }
+  try {
+    window.addEventListener('deviceorientationabsolute', handleOrientation);
+    window.addEventListener('deviceorientation', handleOrientation);
+  } catch(e){}
+
+  // ============ UI wiring ============
+  document.getElementById('fabLocate').addEventListener('click', function(){ oneOffLocate(true); });
+  document.getElementById('fabAddHere').addEventListener('click', function(){ oneOffLocate(false); });
+  document.getElementById('fabWalk').addEventListener('click', function(){ walking ? stopWalking() : startWalking(); });
+  document.getElementById('fabCapture').addEventListener('click', function(){
+    if (currentGpsFix) addPoint(currentGpsFix.lat, currentGpsFix.lng, 0);
+    else showToast('لم يتم تحديد موقعك بعد، انتظر لحظة');
   });
 
-  document.getElementById('goBtn').addEventListener('click', function(){
-    var lat = parseFloat(document.getElementById('manLat').value); var lng = parseFloat(document.getElementById('manLng').value);
-    if (!isNaN(lat) && !isNaN(lng)) map.setView([lat,lng], 18);
-    else alert('يرجى إدخال إحداثيات الانتقال أولاً.');
+  document.getElementById('walkToggleBtn').addEventListener('click', function(){ walking ? stopWalking() : startWalking(); });
+  document.getElementById('walkCaptureBtn').addEventListener('click', function(){
+    if (currentGpsFix) addPoint(currentGpsFix.lat, currentGpsFix.lng, 0);
+    else showToast('لم يتم تحديد موقعك بعد، انتظر لحظة');
   });
-  
+  document.getElementById('clearBreadcrumbBtn').addEventListener('click', function(){
+    if (breadcrumb){ map.removeLayer(breadcrumb); breadcrumb=null; breadcrumbCoords=[]; showToast('تم مسح أثر المسار'); }
+  });
+  document.getElementById('autoCaptureChk').addEventListener('change', function(e){ autoCaptureEnabled = e.target.checked; lastCapturePos=null; });
+  document.getElementById('autoCaptureInt').addEventListener('change', function(e){ autoCaptureInterval = parseFloat(e.target.value)||5; });
+
   document.getElementById('undoBtn').addEventListener('click', undoLast);
 
-  var clearBtn = document.getElementById('clearBtn'); var clearArmed = false, clearTimer = null;
+  var clearBtn = document.getElementById('clearBtn');
+  var clearArmed = false, clearTimer = null;
   clearBtn.addEventListener('click', function(){
     if (!clearArmed){
       clearArmed = true; clearBtn.textContent = 'اضغط للتأكيد'; clearBtn.classList.add('danger-armed');
-      clearTimer = setTimeout(function(){ clearArmed = false; clearBtn.textContent = '🗑️ مسح الكل'; clearBtn.classList.remove('danger-armed'); }, 3000);
+      clearTimer = setTimeout(function(){ clearArmed=false; clearBtn.textContent='🗑 مسح الكل'; clearBtn.classList.remove('danger-armed'); }, 3000);
     } else {
-      clearArmed = false; clearBtn.textContent = '🗑️ مسح الكل'; clearBtn.classList.remove('danger-armed'); clearTimeout(clearTimer); clearAll();
+      clearTimeout(clearTimer); clearArmed=false; clearBtn.textContent='🗑 مسح الكل'; clearBtn.classList.remove('danger-armed');
+      clearAll();
     }
   });
 
-  document.getElementById('expKML').addEventListener('click', function(){ if(!guardEmpty()) handleExport(buildKML(), 'survey_export.kml', 'application/vnd.google-earth.kml+xml'); });
-  document.getElementById('expDXF').addEventListener('click', function(){ if(!guardEmpty()) handleExport(buildDXF(), 'survey_export.dxf', 'image/vnd.dxf'); });
-  document.getElementById('expCSV').addEventListener('click', function(){ if(!guardEmpty()) handleExport(buildCSV(), 'survey_export.csv', 'text/csv'); });
-  document.getElementById('expTXT').addEventListener('click', function(){ if(!guardEmpty()) handleExport(buildTXT(), 'survey_export.txt', 'text/plain'); });
-
+  document.getElementById('expKML').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildKML()],{type:'application/vnd.google-earth.kml+xml'}), projectFileBase()+'.kml'); });
+  document.getElementById('expDXF').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildDXF()],{type:'application/dxf'}), projectFileBase()+'.dxf'); });
+  document.getElementById('expCSV').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildCSV()],{type:'text/csv'}), projectFileBase()+'.csv'); });
+  document.getElementById('expTXT').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildTXT()],{type:'text/plain'}), projectFileBase()+'_PNEZD.txt'); });
   document.getElementById('expZIP').addEventListener('click', function(){
-    if(guardEmpty()) return;
+    if (guardEmpty()) return;
     var zip = new JSZip();
-    zip.file("survey_export.kml", buildKML()); zip.file("survey_export.dxf", buildDXF()); zip.file("survey_export.csv", buildCSV()); zip.file("survey_export.txt", buildTXT());
-    zip.generateAsync({type:"blob"}).then(function(content) {
-      downloadFile(content, "all_survey_exports.zip", "application/zip");
-      if (navigator.share) {
-        var file = new File([content], "all_survey_exports.zip", {type: "application/zip"});
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ files: [file], title: 'ملفات المساحة كاملة', text: 'مرفق ملف ZIP بالصيغ الميدانية' }).catch(console.error);
-        }
-      }
+    zip.file('survey.kml', buildKML());
+    zip.file('survey.dxf', buildDXF());
+    zip.file('survey.csv', buildCSV());
+    zip.file('survey_PNEZD.txt', buildTXT());
+    zip.generateAsync({ type:'blob' }).then(function(blob){ shareOrDownload(blob, projectFileBase()+'_export.zip'); });
+  });
+
+  document.getElementById('saveProjectBtn').addEventListener('click', saveProject);
+  document.getElementById('openProjectBtn').addEventListener('click', function(){ document.getElementById('openProjectInput').click(); });
+  document.getElementById('openProjectInput').addEventListener('change', function(e){
+    if (e.target.files && e.target.files[0]) loadProjectFile(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  document.getElementById('manAddBtn').addEventListener('click', function(){
+    var lat = parseFloat(document.getElementById('manLat').value);
+    var lng = parseFloat(document.getElementById('manLng').value);
+    var elev = parseFloat(document.getElementById('manElev').value)||0;
+    var desc = document.getElementById('manDesc').value;
+    if (isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180){ showToast('أدخل خط عرض/طول صحيحين'); return; }
+    addPoint(lat,lng,elev,desc);
+    map.panTo([lat,lng]);
+    document.getElementById('manLat').value=''; document.getElementById('manLng').value=''; document.getElementById('manDesc').value='';
+  });
+
+  document.getElementById('goBtn').addEventListener('click', function(){
+    var lat = parseFloat(document.getElementById('goLat').value);
+    var lng = parseFloat(document.getElementById('goLng').value);
+    if (isNaN(lat)||isNaN(lng)) return;
+    map.setView([lat,lng], 16);
+  });
+
+  // Sheet expand/collapse + tabs
+  var sheet = document.getElementById('sheet');
+  var fabStack = document.getElementById('fabStack');
+  document.getElementById('sheetHandle').addEventListener('click', function(){
+    sheet.classList.toggle('collapsed');
+    fabStack.classList.toggle('hide-fabs', !sheet.classList.contains('collapsed'));
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+      if (sheet.classList.contains('collapsed')){ sheet.classList.remove('collapsed'); fabStack.classList.add('hide-fabs'); }
     });
   });
 
-  document.getElementById('closeModalBtn').addEventListener('click', function(){ document.getElementById('exportModal').style.display = 'none'; });
-  document.getElementById('copyTextBtn').addEventListener('click', function(){
-    var ta = document.getElementById('modalTextArea'); ta.select(); ta.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(ta.value).then(function() { alert('📋 تم نسخ النص المساحي للملف!'); });
-  });
-  document.getElementById('shareTextBtn').addEventListener('click', function(){
-    var ta = document.getElementById('modalTextArea'); if (navigator.share) navigator.share({ title: 'بيانات الرفع', text: ta.value }).catch(console.error);
-  });
+  document.getElementById('infoBtn').addEventListener('click', function(){ document.getElementById('infoOverlay').classList.remove('hidden'); });
+  document.getElementById('infoCloseBtn').addEventListener('click', function(){ document.getElementById('infoOverlay').classList.add('hidden'); });
 
-});
+  recalcAll();
+})();
 </script>
 </body>
 </html>
