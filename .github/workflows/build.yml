@@ -24,6 +24,7 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           echo '{"appId": "com.mohammadalarem.total", "appName": "Total Survey", "webDir": "www"}' > capacitor.config.json
 
+          # تعديل ملف البناء تلقائياً في سيرفرات جيت هاب لحقن صلاحيات الـ GPS فور إنشائه
       - name: Prepare Web Assets
         run: |
           mkdir -p www
@@ -33,6 +34,11 @@ jobs:
         run: |
           npx cap add android
           npx cap sync android
+
+      - name: Inject GPS Permissions
+        run: |
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />' android/app/src/main/AndroidManifest.xml
 
       - name: Setup Java JDK 21
         uses: actions/setup-java@v4
