@@ -159,6 +159,19 @@
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-track{background:var(--panel);}
   ::-webkit-scrollbar-thumb{background:#2a333d;border-radius:5px;}
+
+  /* Export fallback modal (copy/share when WebView blocks direct download) */
+  #exportModal{position:fixed;inset:0;background:rgba(6,9,12,0.92);z-index:950;display:none;
+    align-items:center;justify-content:center;padding:20px;}
+  #exportModal.show{display:flex;}
+  .modal-card{background:var(--panel-alt);border:1px solid var(--line);border-radius:12px;padding:16px;
+    max-width:440px;width:100%;max-height:85vh;display:flex;flex-direction:column;gap:10px;}
+  .modal-card h3{margin:0;color:var(--amber);font-size:14.5px;display:flex;justify-content:space-between;align-items:center;}
+  .modal-close{cursor:pointer;color:var(--text-dim);font-size:20px;line-height:1;}
+  .modal-hint{font-size:11.5px;color:var(--text-dim);line-height:1.6;margin:0;}
+  #modalTextArea{width:100%;height:160px;resize:none;direction:ltr;font-family:var(--font-mono);
+    font-size:11px;padding:8px;background:#06090C;border:1px solid var(--line);color:var(--text);
+    border-radius:8px;box-sizing:border-box;}
 </style>
 </head>
 <body>
@@ -304,9 +317,21 @@
       <li>🎯 <b>توسيط الخريطة:</b> ينقل العرض لموقعك دون إضافة نقطة.</li>
       <li>📊 المساحة والمحيط يُحسبان تلقائياً بعد 3 نقاط فأكثر، بدقة المتر (UTM).</li>
       <li>💾 احفظ مشروعك كملف لاستكماله لاحقاً، وصدّر النتائج بصيغة DXF / KML / CSV / TXT.</li>
-      <li>⚠️ لعمل GPS والخريطة بشكل كامل، افتح هذا الملف مباشرة في متصفح Chrome على جوالك (لا تستخدم معاينة المحادثة).</li>
+      <li>⚠️ لعمل GPS بشكل كامل، يجب فتح التطبيق من رابط مستضاف (https) وليس كملف مباشر، ومنح إذن الموقع عند الطلب.</li>
     </ul>
     <button class="btn primary block" id="infoCloseBtn">حسناً، فهمت</button>
+  </div>
+</div>
+
+<div id="exportModal">
+  <div class="modal-card">
+    <h3><span id="modalTitle">تصدير ملف</span><span class="modal-close" id="closeModalBtn">&times;</span></h3>
+    <p class="modal-hint">إذا لم يبدأ التنزيل تلقائياً (شائع داخل تطبيقات الأندرويد المُغلّفة)، انسخ النص أدناه أو شاركه مباشرة عبر واتساب/البريد:</p>
+    <textarea id="modalTextArea" readonly></textarea>
+    <div class="btn-row">
+      <button class="btn primary" id="copyTextBtn" style="flex:1;">📋 نسخ النص</button>
+      <button class="btn" id="shareTextBtn" style="flex:1;">🔗 مشاركة</button>
+    </div>
   </div>
 </div>
 
@@ -534,8 +559,12 @@
         addPoint(lat,lng,0);
         showToast('تمت إضافة نقطة (دقة ' + acc.toFixed(0) + ' م)');
       }
-    }, function(){
-      showToast('تعذر تحديد الموقع — تحقق من تفعيل GPS والإذن للمتصفح');
+    }, function(err){
+      if (err && err.code === 1){
+        showToast('⚠️ تم رفض إذن الموقع — إذا كنت تستخدم التطبيق داخل تطبيق أندرويد مُغلّف، تأكد من منح إذن الموقع (GPS) له من إعدادات الجهاز', 4500);
+      } else {
+        showToast('تعذر تحديد الموقع — تحقق من تفعيل GPS والإذن للمتصفح');
+      }
     }, { enableHighAccuracy:true, timeout:12000, maximumAge:0 });
   }
 
@@ -600,8 +629,12 @@
     updateWalkUI();
   }
 
-  function onWalkError(){
-    showToast('تعذر الحصول على الموقع — تحقق من تفعيل GPS والأذونات');
+  function onWalkError(err){
+    if (err && err.code === 1){
+      showToast('⚠️ تم رفض إذن الموقع من النظام — إذا كان التطبيق مُغلّفاً كتطبيق أندرويد (WebView)، يجب منح إذن GPS له من إعدادات الجهاز أو من كود التطبيق نفسه', 5000);
+    } else {
+      showToast('تعذر الحصول على الموقع — تحقق من تفعيل GPS والأذونات');
+    }
   }
 
   function startWalking(){
@@ -698,6 +731,15 @@
     } catch(e){}
     triggerDownload(blob, filename);
   }
+  // Text-based exports (KML/DXF/CSV/TXT/JSON): always attempt a direct download
+  // AND show a copy/share fallback, since many Android WebView wrappers silently
+  // block blob downloads with no visible error.
+  function exportTextFile(content, filename, mime){
+    try { triggerDownload(new Blob([content],{type:mime}), filename); } catch(e){}
+    document.getElementById('modalTitle').textContent = 'تصدير: ' + filename;
+    document.getElementById('modalTextArea').value = content;
+    document.getElementById('exportModal').classList.add('show');
+  }
   function projectFileBase(){
     var n = (document.getElementById('projectName').value||'').trim();
     if (!n) return 'survey';
@@ -716,7 +758,7 @@
       name: projectFileBase(), createdAt: new Date().toISOString(), nextId: nextId,
       points: points.map(function(p){ return { id:p.id, lat:p.lat, lng:p.lng, elev:p.elev, desc:p.desc }; })
     };
-    shareOrDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), projectFileBase()+'.json');
+    exportTextFile(JSON.stringify(data,null,2), projectFileBase()+'.json', 'application/json');
   }
   function loadProjectFile(file){
     var reader = new FileReader();
@@ -781,10 +823,10 @@
     }
   });
 
-  document.getElementById('expKML').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildKML()],{type:'application/vnd.google-earth.kml+xml'}), projectFileBase()+'.kml'); });
-  document.getElementById('expDXF').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildDXF()],{type:'application/dxf'}), projectFileBase()+'.dxf'); });
-  document.getElementById('expCSV').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildCSV()],{type:'text/csv'}), projectFileBase()+'.csv'); });
-  document.getElementById('expTXT').addEventListener('click', function(){ if(!guardEmpty()) shareOrDownload(new Blob([buildTXT()],{type:'text/plain'}), projectFileBase()+'_PNEZD.txt'); });
+  document.getElementById('expKML').addEventListener('click', function(){ if(!guardEmpty()) exportTextFile(buildKML(), projectFileBase()+'.kml', 'application/vnd.google-earth.kml+xml'); });
+  document.getElementById('expDXF').addEventListener('click', function(){ if(!guardEmpty()) exportTextFile(buildDXF(), projectFileBase()+'.dxf', 'application/dxf'); });
+  document.getElementById('expCSV').addEventListener('click', function(){ if(!guardEmpty()) exportTextFile(buildCSV(), projectFileBase()+'.csv', 'text/csv'); });
+  document.getElementById('expTXT').addEventListener('click', function(){ if(!guardEmpty()) exportTextFile(buildTXT(), projectFileBase()+'_PNEZD.txt', 'text/plain'); });
   document.getElementById('expZIP').addEventListener('click', function(){
     if (guardEmpty()) return;
     var zip = new JSZip();
@@ -839,6 +881,21 @@
 
   document.getElementById('infoBtn').addEventListener('click', function(){ document.getElementById('infoOverlay').classList.remove('hidden'); });
   document.getElementById('infoCloseBtn').addEventListener('click', function(){ document.getElementById('infoOverlay').classList.add('hidden'); });
+
+  document.getElementById('closeModalBtn').addEventListener('click', function(){ document.getElementById('exportModal').classList.remove('show'); });
+  document.getElementById('copyTextBtn').addEventListener('click', function(){
+    var ta = document.getElementById('modalTextArea'); ta.select(); ta.setSelectionRange(0, 99999);
+    try {
+      navigator.clipboard.writeText(ta.value).then(function(){ showToast('تم نسخ النص ✅'); }).catch(function(){
+        document.execCommand('copy'); showToast('تم نسخ النص ✅');
+      });
+    } catch(e){ document.execCommand('copy'); showToast('تم نسخ النص ✅'); }
+  });
+  document.getElementById('shareTextBtn').addEventListener('click', function(){
+    var ta = document.getElementById('modalTextArea');
+    if (navigator.share) navigator.share({ title: document.getElementById('modalTitle').textContent, text: ta.value }).catch(function(){});
+    else showToast('المشاركة غير مدعومة هنا — استخدم زر النسخ');
+  });
 
   recalcAll();
 })();
